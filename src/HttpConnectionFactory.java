@@ -6,7 +6,7 @@ public class HttpConnectionFactory implements ConnectionFactory {
     private Socket socket;
     private HttpConnection connection;
 
-    public HttpConnectionFactory(int port, String path) {
+    public HttpConnectionFactory(int port, String path, Router router) {
         this.port = port;
         this.path = path;
     }
@@ -21,4 +21,6 @@ public class HttpConnectionFactory implements ConnectionFactory {
     public Connection getConnection() {
         return connection;
     }
+
+
 }

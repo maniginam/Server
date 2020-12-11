@@ -1,21 +1,27 @@
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 public class TestHelper {
     private Socket socket;
     private Connection connection;
     private ConnectionFactory connectionFactory;
+    private InputStream input;
+    private BufferedInputStream buffed;
+    private OutputStream output;
 
 
-//    public void connect() throws IOException {
-//        socket = new Socket("localhost", 3141);
-//    }
-
-    public Socket getSocket() {
-        return socket;
+    public void connect() throws IOException {
+        socket = new Socket("localhost", 3141);
+        input = socket.getInputStream();
+        buffed = new BufferedInputStream(input);
+        output = socket.getOutputStream();
     }
 
+    public Socket getSocket() { return socket; }
+    public OutputStream getOutput() {
+        return output;
+    }
+    public BufferedInputStream getBuffedInput() { return buffed; }
 }
 
 class TestConnectionFactory implements ConnectionFactory {
@@ -30,8 +36,8 @@ class TestConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public TestConnection createConnection(SocketHost socketHost, Socket socket) {
-        connection = new TestConnection();
+    public TestConnection createConnection(SocketHost host, Socket socket) {
+        connection = new TestConnection(host, socket);
         return connection;
     }
 
@@ -42,6 +48,10 @@ class TestConnectionFactory implements ConnectionFactory {
 
 }
 
-class TestConnection extends Connection {
+class TestConnection extends HttpConnection {
+
+    public TestConnection(SocketHost host, Socket socket) {
+        super(host, socket);
+    }
 }
 

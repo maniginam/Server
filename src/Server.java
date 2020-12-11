@@ -28,7 +28,8 @@ public class Server {
     private static void startServer(Map<String, String> args) throws IOException {
         int port = Integer.parseInt(args.get("-p"));
         String path = args.get("-r");
-        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, path);
+        Router router = new Router();
+        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, path, router);
         SocketHost host = new SocketHost(port, connectionFactory);
         Responder fileResponder = new FileResponder();
         host.start();
