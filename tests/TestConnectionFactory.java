@@ -4,6 +4,7 @@ public class TestConnectionFactory implements ConnectionFactory {
     private final int port;
     private final String path;
     private Socket socket;
+    private TestConnection connection;
 
     public TestConnectionFactory(int port, String path) {
         this.port = port;
@@ -12,7 +13,12 @@ public class TestConnectionFactory implements ConnectionFactory {
 
     @Override
     public Connection createConnection(SocketHost host, Socket socket) {
-        Connection connection = new TestConnection(host, socket);
+        connection = new TestConnection(host, socket);
+        return connection;
+    }
+
+    @Override
+    public Connection getConnection() {
         return connection;
     }
 }

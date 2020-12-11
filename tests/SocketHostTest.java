@@ -21,14 +21,16 @@ public class SocketHostTest {
         helper = new TestHelper();
         connectionFactory = new TestConnectionFactory(3141, String.valueOf(new File(".").getCanonicalPath()));
         host = new SocketHost(3141, connectionFactory);
+        connection = connectionFactory.getConnection();
+//        socket = new Socket("localhost", 3141);
     }
 
-    @AfterEach
-    private void tearDown() throws Exception {
-        host.stop();
-        if (socket != null)
-            socket.close();
-    }
+//    @AfterEach
+//    private void tearDown() throws Exception {
+//        host.stop();
+//        if (socket != null)
+//            socket.close();
+//    }
 
     @Test
     public void isConnected() throws Exception {

@@ -10,9 +10,8 @@ public class HttpConnection implements Connection {
         this.socket = socket;
     }
 
-
     @Override
-    public void run(Socket socket) {
+    public void run() {
         thread = new Thread(this);
         thread.start();
     }
@@ -21,10 +20,5 @@ public class HttpConnection implements Connection {
     public void stop() throws InterruptedException {
         if (thread != null)
             thread.join();
-    }
-
-    @Override
-    public void run() {
-
     }
 }

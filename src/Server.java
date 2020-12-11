@@ -6,7 +6,7 @@ import java.util.Map;
 public class Server {
     private static String message;
     private SocketHost host;
-    private ConnectionFactory connectionFactory;
+    private HttpConnectionFactory connectionFactory;
 
     public static void main(String[] args) throws IOException {
         Map<String, String> argMap = makeArgMap(args);

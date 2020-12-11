@@ -9,7 +9,6 @@ public class SocketHost {
     private final ConnectionFactory connectionFactory;
     private ServerSocket server;
     private Thread connectionThread;
-    private Socket socket;
     private List<Connection> connections;
     private boolean running;
 
@@ -37,12 +36,12 @@ public class SocketHost {
         connectionThread.start();
     }
 
-    private void acceptConnections() {
+    public void acceptConnections() throws Exception {
         try {
-            socket = server.accept();
+            Socket socket = server.accept();
             Connection connection = connectionFactory.createConnection(this, socket);
             connections.add(connection);
-            connection.run(socket);
+            connection.run();
         } catch (IOException e) {
             e.printStackTrace();
         }

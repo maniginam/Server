@@ -4,6 +4,7 @@ public class HttpConnectionFactory implements ConnectionFactory {
     private final String path;
     private final int port;
     private Socket socket;
+    private HttpConnection connection;
 
     public HttpConnectionFactory(int port, String path) {
         this.port = port;
@@ -12,7 +13,12 @@ public class HttpConnectionFactory implements ConnectionFactory {
 
     @Override
     public Connection createConnection(SocketHost host, Socket socket) {
-        Connection connection = new HttpConnection(host, socket);
+        connection = new HttpConnection(host, socket);
+        return connection;
+    }
+
+    @Override
+    public Connection getConnection() {
         return connection;
     }
 }

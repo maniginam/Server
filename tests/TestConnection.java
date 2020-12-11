@@ -11,20 +11,11 @@ public class TestConnection implements Connection {
     }
 
     @Override
-    public void run(Socket socket) {
-        thread = new Thread(this);
-        thread.start();
-
+    public void run() {
     }
 
     @Override
     public void stop() throws InterruptedException {
-        if (thread != null)
-            thread.join();
     }
 
-    @Override
-    public void run() {
-
-    }
 }
