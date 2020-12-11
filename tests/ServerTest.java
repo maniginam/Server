@@ -105,37 +105,37 @@ public class ServerTest {
         assertEquals(message, result);
     }
 
-    @Test
-    public void callMain() throws IOException {
-        String[] args = new String[0];
-        Map<String, String> argMap = new HashMap<>();
+//    @Test
+//    public void callMain() throws IOException {
+//        String[] args = new String[0];
+//        Map<String, String> argMap = new HashMap<>();
+//
+//        server.main(args);
+//        String result = server.getMessage();
+//
+//        server.setConfigMessage(argMap);
+//        String target = server.getMessage();
+//
+//        assertEquals(target, result);
+//    }
 
-        server.main(args);
-        String result = server.getMessage();
-
-        server.setConfigMessage(argMap);
-        String target = server.getMessage();
-
-        assertEquals(target, result);
-    }
-
-    @Test
-    public void callMainWithpAndr() throws IOException {
-        String[] args = new String[4];
-        args[0] = "-p";
-        args[1] = "3141";
-        args[2] = "-r";
-        args[3] = "/testroot";
-        Map<String, String> argMap = new HashMap<>();
-        argMap.put("-p", "3141");
-        argMap.put("-r", "/testroot");
-
-        server.main(args);
-        String result = server.getMessage();
-
-        server.setConfigMessage(argMap);
-        String target = server.getMessage();
-
-        assertEquals(target, result);
-    }
+//    @Test
+//    public void callMainWithpAndr() throws IOException {
+//        String[] args = new String[4];
+//        args[0] = "-p";
+//        args[1] = "3141";
+//        args[2] = "-r";
+//        args[3] = "/testroot";
+//        Map<String, String> argMap = new HashMap<>();
+//        argMap.put("-p", "3141");
+//        argMap.put("-r", "/testroot");
+//
+//        server.main(args);
+//        String result = server.getMessage();
+//
+//        server.setConfigMessage(argMap);
+//        String target = server.getMessage();
+//
+//        assertEquals(target, result);
+//    }
 }

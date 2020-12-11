@@ -1,16 +1,17 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.List;
 
 public class SocketHost {
-    private final int port;
     private final ConnectionFactory connectionFactory;
+    private final int port;
     private ServerSocket server;
-    private Thread connectionThread;
-    private List<Connection> connections;
     private boolean running;
+    private Thread connectorThread;
+    private List<Connection> connections;
 
     public SocketHost(int port, ConnectionFactory connectionFactory) {
         this.port = port;
@@ -32,18 +33,31 @@ public class SocketHost {
             }
         };
         running = true;
-        connectionThread = new Thread(connector);
-        connectionThread.start();
+        connectorThread = new Thread(connector);
+        connectorThread.start();
+
     }
 
-    public void acceptConnections() throws Exception {
-        try {
-            Socket socket = server.accept();
-            Connection connection = connectionFactory.createConnection(this, socket);
-            connections.add(connection);
-            connection.run();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void acceptConnections() throws IOException {
+        while (running) {
+            try {
+                Socket socket = server.accept();
+                Connection connection = connectionFactory.createConnection(this, socket);
+                connections.add(connection);
+            } catch (SocketException e) {
+                // closed socket service while waiting for connection
+            }
+        }
+    }
+
+    public void stop() throws IOException, InterruptedException {
+        while (running) {
+            running = false;
+            for (Connection connection : connections) {
+                connection.stop();
+            }
+            server.close();
+            connectorThread.join();
         }
     }
 
@@ -51,14 +65,15 @@ public class SocketHost {
         return running;
     }
 
-    public void stop() throws IOException, InterruptedException {
-        if (running) {
-            server.close();
-            running = false;
-            for (Connection connection : connections) {
-                connection.stop();
-            }
-            connectionThread.join();
-        }
+    public int getPort() {
+        return port;
+    }
+
+    public List<Connection> getConnections() {
+        return connections;
+    }
+
+    public Thread getConnectorThread() {
+        return connectorThread;
     }
 }

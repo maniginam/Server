@@ -1,5 +1,18 @@
-import java.net.Socket;
+public class Connection implements Runnable {
+    public Thread thread;
 
-public interface Connection extends Runnable {
-    void stop() throws InterruptedException;
+    @Override
+    public void run() {
+        thread = new Thread(this);
+        thread.start();
+    }
+
+    public void stop() throws InterruptedException {
+        if (thread != null)
+            thread.join();
+    }
+
+    public Thread getThread() {
+        return thread;
+    }
 }

@@ -21,18 +21,17 @@ public class Server {
         } else {
             setConfigMessage(argMap);
             System.out.println(message);
-            Server server = new Server();
-            server.startServer(argMap);
+            startServer(argMap);
         }
     }
 
-    private void startServer(Map<String, String> args) {
+    private static void startServer(Map<String, String> args) throws IOException {
         int port = Integer.parseInt(args.get("-p"));
         String path = args.get("-r");
-        connectionFactory = new HttpConnectionFactory(port, path);
-        host = new SocketHost(port, connectionFactory);
+        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, path);
+        SocketHost host = new SocketHost(port, connectionFactory);
         Responder fileResponder = new FileResponder();
-//        host.start();
+        host.start();
 //        host.getConnectionThread().join();
     }
 
