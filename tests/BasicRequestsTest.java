@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,14 +44,21 @@ public class BasicRequestsTest {
         OutputStream output = helper.getOutput();
         BufferedInputStream input = helper.getBuffedInput();
 
+        Map<String, String> target = new HashMap<String, String>();
+        target.put("method", "GET");
+        target.put("resource", "/index.html");
+        target.put("httpVersion", "HTTP/1.1");
+
         String request = "GET HTTP/1.1";
         output.write(request.getBytes());
 
         connections = host.getConnections();
         for (Connection connection : connections) {
             connection.start();
+            Request result = connection.getParser().getRequest();
+            assertEquals("GET", connection.getParser().getMethod());
+            assertEquals(target, request);
         }
-
 
     }
 

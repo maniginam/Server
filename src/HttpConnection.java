@@ -23,23 +23,27 @@ public class HttpConnection implements Connection {
 
     @Override
     public void run() {
-        RequestParser parser = new RequestParser();
-//        try {
-//            InputStream input = socket.getInputStream();
-//            BufferedInputStream binput = new BufferedInputStream(input);
-//            boolean isHeaderComplete = parser.isHeaderComplete();
-//
-//            while(host.isRunning() && socket.isConnected()) {
-//                if (binput.available() > 0) {
-//                    byte[] marker = "\r\n\r\n".getBytes();
-//                    ByteArrayOutputStream outputHeader = new ByteArrayOutputStream();
-//                    while(!isHeaderComplete)
-//                        outputHeader.write(binput.read());
-//                }
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            InputStream input = socket.getInputStream();
+            BufferedInputStream binput = new BufferedInputStream(input);
+            boolean isHeaderComplete = parser.isHeaderComplete();
+
+            while(host.isRunning() && socket.isConnected()) {
+                RequestParser parser = new RequestParser();
+                if (binput.available() > 0) {
+                    ByteArrayOutputStream outputHeader = new ByteArrayOutputStream();
+                    while(!isHeaderComplete) {
+                        outputHeader.write(binput.read());
+                        byte[] output = outputHeader.toByteArray();
+                        parser.parse(output);
+                        isHeaderComplete = parser.isHeaderComplete();
+                    }
+                } else Thread.sleep(1);
+            }
+        } catch (IOException | ExceptionInfo | InterruptedException e) {
+            e.printStackTrace();
+        }
+        host.getConnections().remove(this);
     }
 
     public void stop() throws InterruptedException {
@@ -52,6 +56,6 @@ public class HttpConnection implements Connection {
     }
 
     public RequestParser getParser() {
-        return null;
+        return parser;
     }
 }

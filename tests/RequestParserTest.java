@@ -19,62 +19,51 @@ public class RequestParserTest {
 
     @Test
     public void parseBlankTargetRequest() throws IOException, ExceptionInfo {
-        String request = "GET HTTP/1.1";
+        String request = "GET HTTP/1.1\r\n\r\n";
 
         Map<String, String> target = new HashMap<String, String>();
         target.put("method", "GET");
         target.put("resource", "/index.html");
         target.put("httpVersion", "HTTP/1.1");
 
-        Request result = parser.parse(request);
-        String method = parser.getMethod();
-        String resource = parser.getResource();
+        Request result = parser.parse(request.getBytes());
 
-        assertEquals("GET", method);
-        assertEquals("/index.html", resource);
         assertEquals(target, result);
+        assertEquals("GET", result.get("method"));
+        assertEquals("/index.html", result.get("resource"));
+        assertEquals("HTTP/1.1", result.get("httpVersion"));
     }
 
     @Test
     public void parseSlashTargetRequest() throws IOException, ExceptionInfo {
-        String request = "GET / HTTP/1.1";
+        String request = "GET / HTTP/1.1\r\n\r\n";
         Map<String, String> target = new HashMap<String, String>();
         target.put("method", "GET");
         target.put("resource", "/index.html");
         target.put("httpVersion", "HTTP/1.1");
 
-        Request result = parser.parse(request);
-        String method = parser.getMethod();
-        String resource = parser.getResource();
-
-        assertEquals("GET", method);
-        assertEquals("/index.html", resource);
+        Request result = parser.parse(request.getBytes());
         assertEquals(target, result);
     }
 
     @Test
     public void parseIndexTargetRequest() throws IOException, ExceptionInfo {
-        String request = "GET /index.html HTTP/1.1";
+        String request = "GET /index.html HTTP/1.1\r\n\r\n";
         Map<String, String> target = new HashMap<String, String>();
         target.put("method", "GET");
         target.put("resource", "/index.html");
         target.put("httpVersion", "HTTP/1.1");
 
-        Request result = parser.parse(request);
-        String method = parser.getMethod();
-        String resource = parser.getResource();
-
-        assertEquals("GET", method);
-        assertEquals("/index.html", resource);
+        Request result = parser.parse(request.getBytes());
         assertEquals(target, result);
     }
 
     @Test
     public void garbageMethod() throws IOException, ExceptionInfo {
-        String request = "Rex /index.html HTTP/1.1";
+        String request = "Rex /index.html HTTP/1.1\r\n\r\n";
 
         assertThrows(ExceptionInfo.class, () -> {
-            parser.parse(request);
+            parser.parse(request.getBytes());
         });
     }
 }
