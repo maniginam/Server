@@ -15,8 +15,7 @@ public class FileResponder implements Responder {
 
     @Override
     public Response respond(Request request) throws IOException {
-        resource = request.get("resource");
-        setBody();
+        setBody(request.get("resource"));
         setHeader();
         setResponse();
         return response;
@@ -29,7 +28,7 @@ public class FileResponder implements Responder {
     }
 
     @Override
-    public void setBody() throws IOException {
+    public void setBody(String resource) throws IOException {
         Path path = Paths.get(root);
         body = Files.readAllBytes(path);
     }

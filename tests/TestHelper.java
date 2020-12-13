@@ -1,5 +1,8 @@
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class TestHelper {
     private Socket socket;
@@ -9,6 +12,14 @@ public class TestHelper {
     private BufferedInputStream buffed;
     private OutputStream output;
 
+    String pathName = new File(".").getCanonicalPath() + "/testroot/index.html";
+    Path path = Paths.get(pathName);
+    File file = new File(String.valueOf(path));
+    byte[] body = Files.readAllBytes(path);
+    int contentLength = body.length;
+
+    public TestHelper() throws IOException {
+    }
 
     public void connect() throws IOException {
         socket = new Socket("localhost", 3141);

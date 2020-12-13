@@ -17,9 +17,11 @@ public class ResponderTest {
     private Request requestMap;
     private Response response;
     private Responder responder;
+    private TestHelper helper;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws IOException {
+        helper = new TestHelper();
         parser = new RequestParser();
         requestMap = new Request();
         response = new Response();
@@ -28,15 +30,12 @@ public class ResponderTest {
     @Test
     public void responseToBlankGET () throws IOException, ExceptionInfo {
         String request = "GET HTTP/1.1\r\n\r\n";
-        String pathName = new File(".").getCanonicalPath() + "/testroot/index.html";
+        String root = helper.pathName;
         requestMap = parser.parse(request.getBytes());
-        responder = new FileResponder(pathName);
+        responder = new FileResponder(root);
         response = responder.respond(requestMap);
-
-        Path path = Paths.get(pathName);
-        File file = new File(String.valueOf(path));
-        byte[] body = Files.readAllBytes(path);
-        int contentLength = body.length;
+        byte[] body = helper.body;
+        int contentLength = helper.contentLength;
 
         ByteArrayInputStream inputArray = new ByteArrayInputStream(body);
         // TODO: 12/12/20 HAD TO PUT THIS INTO A BYTEARRAYINPUTSTREAM IN THE LAST ONE
@@ -52,7 +51,6 @@ public class ResponderTest {
         assertEquals(200, response.get("status"));
         assertEquals(headers, response.get("headers"));
         assertArrayEquals(body, (byte[]) response.get("body"));
-
     }
 
 }

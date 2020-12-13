@@ -9,6 +9,6 @@ public interface Responder {
     Response respond(Request request) throws IOException;
     void setHeader() throws IOException;
     Map<String, String> header = new HashMap<>();
-    void setBody() throws IOException;
+    void setBody(String resource) throws IOException;
 
 }
