@@ -31,7 +31,7 @@ public class Server {
         Router router = new Router();
         HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, path, router);
         SocketHost host = new SocketHost(port, connectionFactory);
-        Responder fileResponder = new FileResponder();
+        Responder fileResponder = new FileResponder(path);
         host.start();
 //        host.getConnectionThread().join();
     }

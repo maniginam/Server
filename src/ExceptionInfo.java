@@ -13,6 +13,7 @@ public class ExceptionInfo extends Throwable {
     }
 
     public void setMessage(String message) throws IOException {
+        // TODO: 12/12/20 NEEDS RESPONDER
         this.message = message;
 
     }
