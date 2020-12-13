@@ -37,9 +37,6 @@ public class ResponderTest {
         byte[] body = helper.body;
         int contentLength = helper.contentLength;
 
-        ByteArrayInputStream inputArray = new ByteArrayInputStream(body);
-        // TODO: 12/12/20 HAD TO PUT THIS INTO A BYTEARRAYINPUTSTREAM IN THE LAST ONE
-
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Length", String.valueOf(contentLength));
         headers.put("Content-Type", "text/html");

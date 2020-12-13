@@ -11,32 +11,44 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ResponseBuilderTest {
 
     private TestHelper helper;
+    private RequestParser parser;
+    private FileResponder responder;
+    private Request requestMap;
+    private Response response;
+    private ResponseBuilder builder;
 
     @BeforeEach
     public void setup() throws IOException {
         helper = new TestHelper();
+        parser = new RequestParser();
+        requestMap = new Request();
+        response = new Response();
     }
 
     @Test
     public void buildBlankResourceResponse() throws IOException, ExceptionInfo {
-        RequestParser parser = new RequestParser();
-        Responder responder = new FileResponder(new File(".").getCanonicalPath());
-        String request = "GET HTTP/1.1";
-        Request requestMap = parser.parse(request.getBytes());
-        Response response = responder.respond(requestMap);
-        ResponseBuilder builder = new ResponseBuilder(response);
+        String request = "GET HTTP/1.1\r\n\r\n";
+        String root = helper.pathName;
+        requestMap = parser.parse(request.getBytes());
+        responder = new FileResponder(root);
+        response = responder.respond(requestMap);
 
         ByteArrayOutputStream target = new ByteArrayOutputStream();
-        target.write("HTTP 200 OK\r\n".getBytes());
-        target.write("Content-Type: text/html\r\n".getBytes());
-        target.write(("Content-Length: " + String.valueOf(helper.contentLength) + "\r\n").getBytes());
-        target.write("\r\n".getBytes());
+        target.write("HTTP 200 OK".getBytes());
+        target.write("Content-Type: text/html".getBytes());
+        target.write(("Content-Length: " + String.valueOf(helper.contentLength)).getBytes());
         target.write(helper.body);
 
-        byte[] result = builder.getResponse();
+        responder = new FileResponder(root);
+        response = responder.respond(requestMap);
+        builder = new ResponseBuilder(response);
+        byte[] result = builder.buildResponse();
 
-        assertArrayEquals(target.toByteArray(), result);
-
+        assertEquals("HTTP/1.1 200 OK\r\n", builder.getStatus());
+        assertEquals("Content-Length: " + String.valueOf(helper.contentLength) + "\r\n" +
+                "Content-Type: text/html\r\n", builder.getHeaders());
+        assertArrayEquals(helper.body, builder.getBody());
+//        assertArrayEquals(target.toByteArray(), result);
 
 
     }
