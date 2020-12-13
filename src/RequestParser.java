@@ -20,31 +20,33 @@ public class RequestParser {
 
     public Request parse(byte[] request) throws IOException, ExceptionInfo {
         requestMap = new Request();
-        byte[] marker = "\r\n\r\n".getBytes();
 
         while (!isHeaderComplete) {
             header = new String(request, StandardCharsets.UTF_8);
             if (header.endsWith("\r\n\r\n")) {
                 isHeaderComplete = true;
                 String startLine = header.split("\r\n")[0];
-                splitStartLine(header);
-            } else {
-
+                splitStartLine(startLine);
             }
         }
-
 
         return requestMap;
     }
 
-    private void splitStartLine(String header) throws IOException, ExceptionInfo {
-        String[] startLine = header.split(" ");
-        String maybeMethod = startLine[0];
-        if (startLine[startLine.length - 1].contains("HTTP/1.1")) {
+    private void splitStartLine(String startLine) throws IOException, ExceptionInfo {
+        String[] startLineParts = startLine.split(" ");
+        String method = startLineParts[0];
+        if (startLineParts[startLineParts.length - 1].contains("HTTP/1.1")) {
             requestMap.put("httpVersion", "HTTP/1.1");
-            requestMap.put("method", extractMethod(maybeMethod));
-            requestMap.put("resource", extractResource(startLine));
+            requestMap.put("method", extractMethod(method));
+            requestMap.put("resource", extractResource(startLineParts));
         } else throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
+    }
+
+    private String extractMethod(String method) throws ExceptionInfo, IOException {
+        if (methods.contains(method))
+            return method;
+        else throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
     }
 
     private String extractResource(String[] startLine) throws ExceptionInfo, IOException {
@@ -57,12 +59,6 @@ public class RequestParser {
                 resource = startLine[1];
         } else throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
         return resource;
-    }
-
-    private String extractMethod(String method) throws ExceptionInfo, IOException {
-        if (methods.contains(method))
-            return method;
-        else throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
     }
 
     public String getMethod() {

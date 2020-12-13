@@ -42,7 +42,6 @@ public class ResponseBuilder {
         body = (byte[]) responseMap.get("body");
         response.write(body);
         response.toByteArray();
-//        ByteArrayInputStream test = new ByteArrayInputStream(response.toByteArray())
     }
 
     public byte[] getResponse() {

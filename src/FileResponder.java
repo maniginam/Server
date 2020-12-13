@@ -1,5 +1,3 @@
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,8 +5,6 @@ import java.nio.file.Paths;
 
 public class FileResponder implements Responder {
     private final String root;
-    private int contentLength;
-    private String resource;
     private byte[] body;
 
     public FileResponder(String root) {
@@ -33,13 +29,10 @@ public class FileResponder implements Responder {
     public void setBody(String resource) throws IOException {
         Path path = Paths.get(root);
         body = Files.readAllBytes(path);
-//        ByteArrayOutputStream bodyOut = new ByteArrayOutputStream();
-//        bodyOut.write(Files.readAllBytes(path));
-//        body = bodyOut.toByteArray();
     }
 
     @Override
-    public void setHeader() throws IOException {
+    public void setHeader() {
         header.put("Content-Type", "text/html");
         header.put("Content-Length", String.valueOf(body.length));
     }

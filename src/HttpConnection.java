@@ -7,12 +7,16 @@ import java.net.Socket;
 public class HttpConnection implements Connection {
     private final Socket socket;
     private final SocketHost host;
+    private final Router router;
     private Thread thread;
     private RequestParser parser;
+    private ResponseBuilder builder;
+    private Responder responder;
 
-    public HttpConnection(SocketHost host, Socket socket) {
+    public HttpConnection(SocketHost host, Socket socket, Router router) {
         this.host = host;
         this.socket = socket;
+        this.router = router;
         parser = new RequestParser();
     }
 
@@ -32,12 +36,14 @@ public class HttpConnection implements Connection {
                 RequestParser parser = new RequestParser();
                 if (binput.available() > 0) {
                     ByteArrayOutputStream outputHeader = new ByteArrayOutputStream();
+                    Request request = null;
                     while(!isHeaderComplete) {
                         outputHeader.write(binput.read());
                         byte[] output = outputHeader.toByteArray();
-                        parser.parse(output);
+                        request = parser.parse(output);
                         isHeaderComplete = parser.isHeaderComplete();
                     }
+                    router.route(request);
                 } else Thread.sleep(1);
             }
         } catch (IOException | ExceptionInfo | InterruptedException e) {
@@ -57,5 +63,10 @@ public class HttpConnection implements Connection {
 
     public RequestParser getParser() {
         return parser;
+    }
+
+    @Override
+    public ResponseBuilder getResponseBuilder() {
+        return builder;
     }
 }

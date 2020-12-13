@@ -8,14 +8,16 @@ import java.util.List;
 public class SocketHost {
     private final ConnectionFactory connectionFactory;
     private final int port;
+    private final Router router;
     private ServerSocket server;
     private boolean running;
     private Thread connectorThread;
     private List<Connection> connections;
 
-    public SocketHost(int port, ConnectionFactory connectionFactory) {
+    public SocketHost(int port, ConnectionFactory connectionFactory, Router router) {
         this.port = port;
         this.connectionFactory = connectionFactory;
+        this.router = router;
         connections = new LinkedList<Connection>();
         running = false;
     }
@@ -42,7 +44,8 @@ public class SocketHost {
         while (running) {
             try {
                 Socket socket = server.accept();
-                Connection connection = connectionFactory.createConnection(this, socket);
+                Connection connection = connectionFactory.createConnection(this, socket, router);
+                connection.start();
                 connections.add(connection);
             } catch (SocketException e) {
                 // closed socket service while waiting for connection

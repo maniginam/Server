@@ -47,8 +47,8 @@ class TestConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public TestConnection createConnection(SocketHost host, Socket socket) {
-        connection = new TestConnection(host, socket);
+    public TestConnection createConnection(SocketHost host, Socket socket, Router router) {
+        connection = new TestConnection(host, socket, router);
         return connection;
     }
 
@@ -61,8 +61,8 @@ class TestConnectionFactory implements ConnectionFactory {
 
 class TestConnection extends HttpConnection {
 
-    public TestConnection(SocketHost host, Socket socket) {
-        super(host, socket);
+    public TestConnection(SocketHost host, Socket socket, Router router) {
+        super(host, socket, router);
     }
 }
 

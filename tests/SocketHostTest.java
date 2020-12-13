@@ -16,11 +16,13 @@ public class SocketHostTest {
     private TestConnectionFactory connectionFactory;
     private TestHelper helper;
     private Connection connection;
+    private Router router;
 
     @BeforeEach
     public void setup() throws IOException {
         connectionFactory = new TestConnectionFactory(3141, String.valueOf(new File(".").getCanonicalPath()));
-        host = new SocketHost(3141, connectionFactory);
+        router = new Router();
+        host = new SocketHost(3141, connectionFactory, router);
     }
 
     private void connect() throws IOException {

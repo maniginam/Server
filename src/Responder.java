@@ -3,6 +3,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface Responder {
+
+
     Request request = new Request();
     Response response = new Response();
     int status = 200;

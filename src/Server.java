@@ -30,7 +30,7 @@ public class Server {
         String path = args.get("-r");
         Router router = new Router();
         HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, path, router);
-        SocketHost host = new SocketHost(port, connectionFactory);
+        SocketHost host = new SocketHost(port, connectionFactory, router);
         Responder fileResponder = new FileResponder(path);
         host.start();
 //        host.getConnectionThread().join();

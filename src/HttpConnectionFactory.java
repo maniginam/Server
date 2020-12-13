@@ -12,8 +12,8 @@ public class HttpConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public Connection createConnection(SocketHost host, Socket socket) {
-        connection = new HttpConnection(host, socket);
+    public Connection createConnection(SocketHost host, Socket socket, Router router) {
+        connection = new HttpConnection(host, socket, router);
         return connection;
     }
 
