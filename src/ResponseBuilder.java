@@ -1,5 +1,3 @@
-import com.sun.deploy.cache.CacheEntry;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
@@ -35,14 +33,16 @@ public class ResponseBuilder {
         Set<String> headerKeys = headerMap.keySet();
         for (String header : headerKeys) {
             headers = headers + header + ": " + headerMap.get(header) + "\r\n";
-            response.write((header + "\r\n").getBytes());
         }
-        response.write("\r\n".getBytes());
+        headers = headers + "\r\n";
+        response.write(headers.getBytes());
     }
 
     private void writeBody() throws IOException {
         body = (byte[]) responseMap.get("body");
         response.write(body);
+        response.toByteArray();
+//        ByteArrayInputStream test = new ByteArrayInputStream(response.toByteArray())
     }
 
     public byte[] getResponse() {

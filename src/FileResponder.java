@@ -1,3 +1,5 @@
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +33,9 @@ public class FileResponder implements Responder {
     public void setBody(String resource) throws IOException {
         Path path = Paths.get(root);
         body = Files.readAllBytes(path);
+//        ByteArrayOutputStream bodyOut = new ByteArrayOutputStream();
+//        bodyOut.write(Files.readAllBytes(path));
+//        body = bodyOut.toByteArray();
     }
 
     @Override

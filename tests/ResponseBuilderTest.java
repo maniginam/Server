@@ -34,9 +34,10 @@ public class ResponseBuilderTest {
         response = responder.respond(requestMap);
 
         ByteArrayOutputStream target = new ByteArrayOutputStream();
-        target.write("HTTP 200 OK".getBytes());
-        target.write("Content-Type: text/html".getBytes());
-        target.write(("Content-Length: " + String.valueOf(helper.contentLength)).getBytes());
+        target.write("HTTP/1.1 200 OK\r\n".getBytes());
+        target.write(("Content-Length: " + helper.contentLength + "\r\n").getBytes());
+        target.write("Content-Type: text/html\r\n".getBytes());
+        target.write("\r\n".getBytes());
         target.write(helper.body);
 
         responder = new FileResponder(root);
@@ -45,10 +46,10 @@ public class ResponseBuilderTest {
         byte[] result = builder.buildResponse();
 
         assertEquals("HTTP/1.1 200 OK\r\n", builder.getStatus());
-        assertEquals("Content-Length: " + String.valueOf(helper.contentLength) + "\r\n" +
-                "Content-Type: text/html\r\n", builder.getHeaders());
+        assertEquals("Content-Length: " + helper.contentLength + "\r\n" +
+                "Content-Type: text/html\r\n\r\n", builder.getHeaders());
         assertArrayEquals(helper.body, builder.getBody());
-//        assertArrayEquals(target.toByteArray(), result);
+        assertArrayEquals(target.toByteArray(), result);
 
 
     }
