@@ -66,44 +66,82 @@ public class BasicRequestsTest {
                 "Content-Type: text/html\r\n\r\n", responseHeader);
         assertArrayEquals(result, result);
         assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
-
-
     }
 
-//    @Test
-//    public void submitSlashTargetRequest() throws IOException, ExceptionInfo {
-//        String request = "GET / HTTP/1.1";
-//        Map<String, String> target = new HashMap<String, String>();
-//        target.put("method", "GET");
-//        target.put("target", "/index.html");
-//        target.put("httpVersion", "HTTP/1.1");
-//
-//        Map<String, String> result = connection.getRequestParser().parse(request);
-//
-//        assertEquals(target, result);
-//    }
-//
-//    @Test
-//    public void submitIndexTargetRequest() throws IOException, ExceptionInfo {
-//        String request = "GET /index.html HTTP/1.1";
-//        Map<String, String> target = new HashMap<String, String>();
-//        target.put("method", "GET");
-//        target.put("target", "/index.html");
-//        target.put("httpVersion", "HTTP/1.1");
-//
-//        Map<String, String> result = connection.getRequestParser().parse(request);
-//
-//        assertEquals(target, result);
-//    }
-//
-//    @Test
-//    public void garbageMethod() throws IOException, ExceptionInfo {
-//        String request = "Rex /index.html HTTP/1.1";
-//
-//        assertThrows(ExceptionInfo.class, () -> {
-//            connection.getRequestParser().parse(request);
-//        });
-//    }
+    @Test
+    public void submitSlashTargetRequest() throws IOException, ExceptionInfo {
+        host.start();
+        helper.connect();
+        output = helper.getOutput();
+        buffed = helper.getBuffedInput();
+        helper.setResource("/index.html");
+
+        String request = "GET / HTTP/1.1\r\n\r\n";
+        output.write(request.getBytes());
+        buffed.read();
+
+        connection = host.getConnections().get(0);
+        builder = connectionBuilder(connection);
+        byte[] result = builder.getResponse();
+        String responseStatus = builder.getStatus();
+        String responseHeader = builder.getHeaders();
+        String responseBodyMsg = readResponseBodyResult(builder.getBody());
+
+        assertEquals("HTTP/1.1 200 OK\r\n", responseStatus);
+        assertEquals("Content-Length: " + helper.getContentLength() + "\r\n" +
+                "Content-Type: text/html\r\n\r\n", responseHeader);
+        assertArrayEquals(result, result);
+        assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
+    }
+
+    @Test
+    public void submitIndexTargetRequest() throws IOException, ExceptionInfo {
+        host.start();
+        helper.connect();
+        output = helper.getOutput();
+        buffed = helper.getBuffedInput();
+        helper.setResource("/index.html");
+
+        String request = "GET /index.html HTTP/1.1\r\n\r\n";
+        output.write(request.getBytes());
+        buffed.read();
+
+        connection = host.getConnections().get(0);
+        builder = connectionBuilder(connection);
+        byte[] result = builder.getResponse();
+        String responseStatus = builder.getStatus();
+        String responseHeader = builder.getHeaders();
+        String responseBodyMsg = readResponseBodyResult(builder.getBody());
+
+        assertEquals("HTTP/1.1 200 OK\r\n", responseStatus);
+        assertEquals("Content-Length: " + helper.getContentLength() + "\r\n" +
+                "Content-Type: text/html\r\n\r\n", responseHeader);
+        assertArrayEquals(result, result);
+        assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
+    }
+
+    @Test
+    public void garbageMethod() throws IOException, ExceptionInfo {
+        host.start();
+        helper.connect();
+        output = helper.getOutput();
+        buffed = helper.getBuffedInput();
+
+        String request = "GET Leo HTTP/1.1\r\n\r\n";
+        output.write(request.getBytes());
+        buffed.read();
+
+        connection = host.getConnections().get(0);
+        builder = connectionBuilder(connection);
+        byte[] result = builder.getResponse();
+        String responseStatus = builder.getStatus();
+        String responseHeader = builder.getHeaders();
+        String responseBodyMsg = readResponseBodyResult(builder.getBody());
+
+        assertThrows(ExceptionInfo.class, () -> {
+            connection.getParser().parse(request.getBytes());
+        });
+    }
 //
 //
 //    @Test

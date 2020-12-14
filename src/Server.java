@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class Server {
     private static String message;
+    private static int port;
+    private static String root;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Map<String, String> argMap = makeArgMap(args);
@@ -25,8 +27,6 @@ public class Server {
 
 
     private static void startServer(Map<String, String> args) throws IOException, InterruptedException {
-        int port = Integer.parseInt(args.get("-p"));
-        String root = args.get("-r");
         Router router = new Router();
         HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, root, router);
         SocketHost host = new SocketHost(port, connectionFactory, router);
@@ -36,7 +36,8 @@ public class Server {
     }
 
     public static void registerResponders(Router router, String root) {
-        router.registerResponder("GET", ".*", new FileResponder(root));
+        router.registerResponder("GET", "/.*{1}?", new FileResponder(root));
+        router.registerResponder("BAD", "bad", new GarbageResponder());
     }
 
     private static Map<String, String> makeArgMap(String[] args) {
@@ -64,20 +65,18 @@ public class Server {
     }
 
     public static void setConfigMessage(Map<String, String> args) throws IOException {
-        int port;
-        String path;
         String invalidArg;
 
         invalidArg = validateArgs(args);
         port = setPort(args);
-        path = setPath(args);
+        root = setRoot(args);
 
         if (invalidArg != null)
             message = "Invalid option: " + invalidArg;
         else {
             String name = "Example Server\r\n";
             String portLine = "Running on port: " + port + ".\r\n";
-            String filesLine = "Serving files from: " + path;
+            String filesLine = "Serving files from: " + root;
             message = name + portLine + filesLine;
         }
     }
@@ -91,13 +90,13 @@ public class Server {
         return invalidArg;
     }
 
-    private static String setPath(Map<String, String> args) throws IOException {
+    private static String setRoot(Map<String, String> args) throws IOException {
         if (args.containsKey("-r"))
             return new File(".").getCanonicalPath() + "/" + args.get("-r");
         else {
-            String path = new File(".").getCanonicalPath();
-            args.put("-r", path);
-            return path;
+            String root = new File(".").getCanonicalPath();
+            args.put("-r", root);
+            return root;
         }
     }
 

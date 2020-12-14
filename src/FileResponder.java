@@ -23,8 +23,8 @@ public class FileResponder implements Responder {
         setResponse();
         return response;
     }
-
-    private void setResponse() {
+    @Override
+    public void setResponse() {
         response.put("status", 200);
         response.put("headers", header);
         response.put("body", body);
@@ -33,7 +33,6 @@ public class FileResponder implements Responder {
     @Override
     public void setBody(String resource) throws IOException {
         Path path = Paths.get((root + resource));
-        System.out.println("path = " + path);
         body = Files.readAllBytes(path);
     }
 

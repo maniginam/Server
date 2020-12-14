@@ -1,5 +1,3 @@
-import com.sun.deploy.net.MessageHeader;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +9,9 @@ public class Router {
     private Responder responder;
     private final Map<String, Map<String, Responder>> methods;
     private final List<String> resourceRegexs;
-    private String resourceRegex;
+    private String responderPointer;
+    private String method;
+    private String resource;
 
     public Router() {
         methods = new HashMap<>();
@@ -19,13 +19,21 @@ public class Router {
     }
 
     public Response route(Request request) throws IOException {
-        String resource = request.get("resource");
-        String method = request.get("method");
+        resource = request.get("resource");
+        method = request.get("method");
         for (String resourceRegex : resourceRegexs) {
-            if (Pattern.matches(resourceRegex, resource))
-                this.resourceRegex = resourceRegex;
+            System.out.println("resource = " + resource);
+            System.out.println("resourceRegex = " + resourceRegex);
+            if (Pattern.matches(resourceRegex, resource)) {
+                responderPointer = resourceRegex;
+                break;
+            }
+            else {
+                method = "BAD";
+                responderPointer = "bad";
+            }
         }
-        responder = methods.get(method).get(resourceRegex);
+        responder = methods.get(method).get(responderPointer);
         Response response = responder.respond(request);
         return response;
     }

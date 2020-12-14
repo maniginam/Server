@@ -16,8 +16,7 @@ public class RequestParser {
 
     public Request parse(byte[] request) throws IOException, ExceptionInfo {
         requestMap = new Request();
-        extractHeader(request);
-
+            extractHeader(request);
         return requestMap;
     }
 
@@ -47,15 +46,12 @@ public class RequestParser {
     }
 
     private String extractResource(String[] startLine) throws ExceptionInfo, IOException {
-        String resource;
-        if (startLine.length < 3) {
-            resource = "/index.html";
-        } else if (startLine.length == 3) {
-            if (startLine[1].matches("/"))
-                resource = "/index.html";
-            else
+        String resource = "/index.html";
+        if (startLine.length == 3) {
+            if (!startLine[1].matches("/"))
                 resource = startLine[1];
-        } else throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
+        } else if (startLine.length != 2)
+            throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
         return resource;
     }
 

@@ -36,11 +36,16 @@ public class HttpConnection implements Connection {
                     RequestParser parser = new RequestParser();
                     ByteArrayOutputStream requestHeader = new ByteArrayOutputStream();
                     byte[] requestBytes = requestHeader.toByteArray();
-                    Request request = parser.parse(requestBytes);
+                    Request request = null;
                     while(!isHeaderComplete) {
                         requestHeader.write(buffedInput.read());
                         requestBytes = requestHeader.toByteArray();
-                        request = parser.parse(requestBytes);
+                        try {
+                            request = parser.parse(requestBytes);
+                        } catch (ExceptionInfo e) {
+                            request.put("method", "BAD");
+                            request.put("resource", e.getMessage());
+                        }
                         isHeaderComplete = parser.isHeaderComplete();
                     }
                     Response responseMap = router.route(request);
@@ -53,7 +58,7 @@ public class HttpConnection implements Connection {
 
                 } else Thread.sleep(1);
             }
-        } catch (IOException | ExceptionInfo | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         host.getConnections().remove(this);

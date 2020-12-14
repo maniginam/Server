@@ -27,4 +27,18 @@ public class RouterTest {
 
         assertTrue(result instanceof FileResponder);
     }
+
+    @Test
+    public void registerGarbageResponder() throws IOException {
+        Router router = new Router();
+        router.registerResponder("BAD", "bad", new GarbageResponder());
+        Request request = new Request();
+        request.put("method", "BAD");
+        request.put("resource", "leo");
+
+        router.route(request);
+        Responder result = router.getResponder();
+
+        assertTrue(result instanceof GarbageResponder);
+    }
 }
