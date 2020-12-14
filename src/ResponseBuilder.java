@@ -4,18 +4,18 @@ import java.util.Map;
 import java.util.Set;
 
 public class ResponseBuilder {
-    private final Response responseMap;
     private ByteArrayOutputStream response;
+    private Response responseMap;
     private String status;
     private String headers;
     private byte[] body;
 
-    public ResponseBuilder(Response responseMap) {
-        this.responseMap = responseMap;
+    public ResponseBuilder() {
         response = new ByteArrayOutputStream();
     }
 
-    public byte[] buildResponse() throws IOException {
+    public byte[] buildResponse(Response responseMap) throws IOException {
+        this.responseMap = responseMap;
         writeStatusLIne();
         writeHeaders();
         writeBody();

@@ -2,13 +2,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileResponder implements Responder {
     private final String root;
+    Response response;
+    Map<String, String> header;
     private byte[] body;
 
     public FileResponder(String root) {
         this.root = root;
+        response = new Response();
     }
 
     @Override
@@ -27,12 +32,14 @@ public class FileResponder implements Responder {
 
     @Override
     public void setBody(String resource) throws IOException {
-        Path path = Paths.get(root);
+        Path path = Paths.get((root + resource));
+        System.out.println("path = " + path);
         body = Files.readAllBytes(path);
     }
 
     @Override
     public void setHeader() {
+        header = new HashMap<>();
         header.put("Content-Type", "text/html");
         header.put("Content-Length", String.valueOf(body.length));
     }

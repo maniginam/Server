@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.Socket;
 
 public class HttpConnectionFactory implements ConnectionFactory {
@@ -12,7 +13,7 @@ public class HttpConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public Connection createConnection(SocketHost host, Socket socket, Router router) {
+    public Connection createConnection(SocketHost host, Socket socket, Router router) throws IOException {
         connection = new HttpConnection(host, socket, router);
         return connection;
     }

@@ -1,7 +1,6 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +12,7 @@ public class RequestParserTest {
     private RequestParser parser;
 
     @BeforeEach
-    public void setup() throws IOException {
+    public void setup() {
         parser = new RequestParser();
     }
 

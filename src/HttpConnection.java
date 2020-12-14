@@ -1,7 +1,4 @@
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.Socket;
 
 public class HttpConnection implements Connection {
@@ -11,13 +8,15 @@ public class HttpConnection implements Connection {
     private Thread thread;
     private RequestParser parser;
     private ResponseBuilder builder;
-    private Responder responder;
+    private OutputStream output;
 
-    public HttpConnection(SocketHost host, Socket socket, Router router) {
+    public HttpConnection(SocketHost host, Socket socket, Router router) throws IOException {
         this.host = host;
         this.socket = socket;
         this.router = router;
+        output = socket.getOutputStream();
         parser = new RequestParser();
+        builder = new ResponseBuilder();
     }
 
     public void start() {
@@ -28,28 +27,40 @@ public class HttpConnection implements Connection {
     @Override
     public void run() {
         try {
-            InputStream input = socket.getInputStream();
-            BufferedInputStream binput = new BufferedInputStream(input);
+            BufferedInputStream buffedInput = new BufferedInputStream(socket.getInputStream());
             boolean isHeaderComplete = parser.isHeaderComplete();
+            builder = new ResponseBuilder();
 
             while(host.isRunning() && socket.isConnected()) {
-                RequestParser parser = new RequestParser();
-                if (binput.available() > 0) {
-                    ByteArrayOutputStream outputHeader = new ByteArrayOutputStream();
-                    Request request = null;
+                if (buffedInput.available() > 0) {
+                    RequestParser parser = new RequestParser();
+                    ByteArrayOutputStream requestHeader = new ByteArrayOutputStream();
+                    byte[] requestBytes = requestHeader.toByteArray();
+                    Request request = parser.parse(requestBytes);
                     while(!isHeaderComplete) {
-                        outputHeader.write(binput.read());
-                        byte[] output = outputHeader.toByteArray();
-                        request = parser.parse(output);
+                        requestHeader.write(buffedInput.read());
+                        requestBytes = requestHeader.toByteArray();
+                        request = parser.parse(requestBytes);
                         isHeaderComplete = parser.isHeaderComplete();
                     }
-                    router.route(request);
+                    Response responseMap = router.route(request);
+                    byte[] response = builder.buildResponse(responseMap);
+
+                    if (response != null) {
+                        send(response);
+                        output.flush();
+                    }
+
                 } else Thread.sleep(1);
             }
         } catch (IOException | ExceptionInfo | InterruptedException e) {
             e.printStackTrace();
         }
         host.getConnections().remove(this);
+    }
+
+    private void send(byte[] response) throws IOException {
+        output.write(response);
     }
 
     public void stop() throws InterruptedException {
@@ -69,4 +80,5 @@ public class HttpConnection implements Connection {
     public ResponseBuilder getResponseBuilder() {
         return builder;
     }
+
 }

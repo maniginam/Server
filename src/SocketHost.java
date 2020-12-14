@@ -10,20 +10,19 @@ public class SocketHost {
     private final int port;
     private final Router router;
     private ServerSocket server;
-    private boolean running;
+    private boolean running = false;
     private Thread connectorThread;
-    private List<Connection> connections;
+    private final List<Connection> connections = new LinkedList<>();
 
     public SocketHost(int port, ConnectionFactory connectionFactory, Router router) {
         this.port = port;
         this.connectionFactory = connectionFactory;
         this.router = router;
-        connections = new LinkedList<Connection>();
-        running = false;
     }
 
     public void start() throws IOException {
         server = new ServerSocket(port);
+        running = true;
         Runnable connector = new Runnable() {
             @Override
             public void run() {
@@ -34,10 +33,8 @@ public class SocketHost {
                 }
             }
         };
-        running = true;
         connectorThread = new Thread(connector);
         connectorThread.start();
-
     }
 
     private void acceptConnections() throws IOException {

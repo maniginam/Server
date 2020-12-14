@@ -2,69 +2,71 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.io.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BasicRequestsTest {
     private TestHelper helper;
     private TestConnectionFactory connectionFactory;
-    private SocketHost host;
-    private HttpConnection connection;
-    private Socket socket;
-    private RequestParser parser;
-    private List<Connection> connections;
     private Router router;
+    private SocketHost host;
+    private OutputStream output;
+    private BufferedInputStream buffed;
+    private Connection connection;
+    private ResponseBuilder builder;
 
     @BeforeEach
     public void setup() throws IOException {
         helper = new TestHelper();
-        connectionFactory = new TestConnectionFactory(3141, String.valueOf(new File(".").getCanonicalPath()));
+        connectionFactory = new TestConnectionFactory(3141, helper.root);
         router = new Router();
+        Server.registerResponders(router, helper.root);
         host = new SocketHost(3141, connectionFactory, router);
     }
 
     @AfterEach
     private void tearDown() throws Exception {
         host.stop();
-        if (socket != null)
-            socket.close();
+        if (helper.getSocket() != null)
+            helper.getSocket().close();
+    }
+
+    private String readResponseBodyResult(byte[] body) throws IOException {
+        InputStream bodyStream = new ByteArrayInputStream(body);
+        InputStreamReader inputReader = new InputStreamReader(bodyStream);
+        BufferedReader reader = new BufferedReader(inputReader);
+        return reader.readLine();
+    }
+
+    private ResponseBuilder connectionBuilder(Connection connection) {
+        return connection.getResponseBuilder();
     }
 
     @Test
-    public void submitBlankTargetRequest() throws IOException, ExceptionInfo {
+    public void submitBlankTargetRequest() throws IOException, ExceptionInfo, InterruptedException {
         host.start();
         helper.connect();
-        OutputStream output = helper.getOutput();
-        BufferedInputStream input = helper.getBuffedInput();
-
-        Map<String, String> target = new HashMap<String, String>();
-        target.put("method", "GET");
-        target.put("resource", "/index.html");
-        target.put("httpVersion", "HTTP/1.1");
+        output = helper.getOutput();
+        buffed = helper.getBuffedInput();
+        helper.setResource("/index.html");
 
         String request = "GET HTTP/1.1\r\n\r\n";
         output.write(request.getBytes());
+        buffed.read();
 
-        connections = host.getConnections();
+        connection = host.getConnections().get(0);
+        builder = connectionBuilder(connection);
+        byte[] result = builder.getResponse();
+        String responseStatus = builder.getStatus();
+        String responseHeader = builder.getHeaders();
+        String responseBodyMsg = readResponseBodyResult(builder.getBody());
 
-        for (Connection connection : connections) {
-            connection.getResponseBuilder().buildResponse();
-            byte[] result = connection.getResponseBuilder().getResponse();
-            String responseStatus = connection.getResponseBuilder().getStatus();
-            String responseHeader = connection.getResponseBuilder().getHeaders();
-            assertEquals("HTTP/1.1 200 OK\r\n", responseStatus);
-            assertEquals("Content-Length: " + helper.contentLength + "\r\n" +
-                    "Content-Type: text/html\r\n\r\n", responseHeader);
-            assertArrayEquals(result, result);
-        }
+        assertEquals("HTTP/1.1 200 OK\r\n", responseStatus);
+        assertEquals("Content-Length: " + helper.getContentLength() + "\r\n" +
+                "Content-Type: text/html\r\n\r\n", responseHeader);
+        assertArrayEquals(result, result);
+        assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
+
 
     }
 

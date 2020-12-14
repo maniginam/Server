@@ -4,4 +4,7 @@ public interface Connection extends Runnable {
     RequestParser getParser();
 
     ResponseBuilder getResponseBuilder();
+
+    Thread getThread();
+
 }

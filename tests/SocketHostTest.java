@@ -11,16 +11,16 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SocketHostTest {
+    private TestHelper helper;
+    private TestConnectionFactory connectionFactory;
     private SocketHost host;
     private Socket socket;
-    private TestConnectionFactory connectionFactory;
-    private TestHelper helper;
-    private Connection connection;
     private Router router;
 
     @BeforeEach
     public void setup() throws IOException {
-        connectionFactory = new TestConnectionFactory(3141, String.valueOf(new File(".").getCanonicalPath()));
+        helper = new TestHelper();
+        connectionFactory = new TestConnectionFactory(3141, helper.root);
         router = new Router();
         host = new SocketHost(3141, connectionFactory, router);
     }
@@ -71,18 +71,18 @@ public class SocketHostTest {
         assertEquals(2, connectionCount);
     }
 
-// TODO: 12/11/20 THIS ONE PASSES ONE OUT OF TEN TIMES
-//    @Test
-//    public void cleanClose() throws Exception {
-//        host.start();
-//        assertTrue(host.getConnectorThread().isAlive());
-//        connect();
-//        host.stop();
-//        assertFalse(host.getConnectorThread().isAlive());
-//        List<Connection> connections = host.getConnections();
-//        for (Connection connection : connections) {
-//            assertFalse(connection.getThread().isAlive());
-//        }
-//    }
+    @Test
+    public void cleanClose() throws Exception {
+        host.start();
+        assertTrue(host.getConnectorThread().isAlive());
+        connect();
+        Thread.sleep(100);
+        host.stop();
+        assertFalse(host.getConnectorThread().isAlive());
+        List<Connection> connections = host.getConnections();
+        for (Connection connection : connections) {
+            assertFalse(connection.getThread().isAlive());
+        }
+    }
 }
 

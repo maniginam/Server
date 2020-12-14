@@ -4,33 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RequestParser {
-    private List<String> methods;
-    private String resource;
-    private String method;
+    private final List<String> methods;
     Request requestMap;
-    private String version;
     private boolean isHeaderComplete;
-    private String header;
 
     public RequestParser() {
-        methods = new ArrayList<String>();
+        methods = new ArrayList<>();
         methods.add("GET");
         isHeaderComplete = false;
     }
 
     public Request parse(byte[] request) throws IOException, ExceptionInfo {
         requestMap = new Request();
-
-        while (!isHeaderComplete) {
-            header = new String(request, StandardCharsets.UTF_8);
-            if (header.endsWith("\r\n\r\n")) {
-                isHeaderComplete = true;
-                String startLine = header.split("\r\n")[0];
-                splitStartLine(startLine);
-            }
-        }
+        extractHeader(request);
 
         return requestMap;
+    }
+
+    private void extractHeader(byte[] request) throws IOException, ExceptionInfo {
+        String header = new String(request, StandardCharsets.UTF_8);
+        if (header.endsWith("\r\n\r\n")) {
+            isHeaderComplete = true;
+            String startLine = header.split("\r\n")[0];
+            splitStartLine(startLine);
+        } else { requestMap = null; }
     }
 
     private void splitStartLine(String startLine) throws IOException, ExceptionInfo {
@@ -50,6 +47,7 @@ public class RequestParser {
     }
 
     private String extractResource(String[] startLine) throws ExceptionInfo, IOException {
+        String resource;
         if (startLine.length < 3) {
             resource = "/index.html";
         } else if (startLine.length == 3) {
@@ -61,19 +59,8 @@ public class RequestParser {
         return resource;
     }
 
-    public String getMethod() {
-        return method;
-    }
-
-    public String getResource() {
-        return resource;
-    }
-
     public boolean isHeaderComplete() {
         return isHeaderComplete;
     }
 
-    public Request getRequest() {
-        return requestMap;
-    }
 }

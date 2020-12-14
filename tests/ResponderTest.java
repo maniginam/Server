@@ -2,9 +2,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,12 +27,13 @@ public class ResponderTest {
     @Test
     public void responseToBlankGET () throws IOException, ExceptionInfo {
         String request = "GET HTTP/1.1\r\n\r\n";
-        String root = helper.pathName;
+        String root = helper.root;
         requestMap = parser.parse(request.getBytes());
         responder = new FileResponder(root);
         response = responder.respond(requestMap);
-        byte[] body = helper.body;
-        int contentLength = helper.contentLength;
+        helper.setResource("/index.html");
+        byte[] body = helper.getBody();
+        int contentLength = helper.getContentLength();
 
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Length", String.valueOf(contentLength));

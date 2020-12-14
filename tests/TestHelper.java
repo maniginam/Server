@@ -11,28 +11,57 @@ public class TestHelper {
     private InputStream input;
     private BufferedInputStream buffed;
     private OutputStream output;
-
-    String pathName = new File(".").getCanonicalPath() + "/testroot/index.html";
-    Path path = Paths.get(pathName);
-    File file = new File(String.valueOf(path));
-    byte[] body = Files.readAllBytes(path);
-    int contentLength = body.length;
+    private BufferedReader reader;
+    private ByteArrayOutputStream outBytes;
+    String root = new File(".").getCanonicalPath() + "/testroot";
+    private Path path;
+    private byte[] body;
+    private int contentLength;
 
     public TestHelper() throws IOException {
     }
+
+    public void setResource(String resource) throws IOException {
+        String fileRoot = root + resource;
+        path = Paths.get(fileRoot);
+        body = Files.readAllBytes(path);
+        contentLength = body.length;
+
+    }
+
 
     public void connect() throws IOException {
         socket = new Socket("localhost", 3141);
         input = socket.getInputStream();
         buffed = new BufferedInputStream(input);
+        reader = new BufferedReader(new InputStreamReader(buffed));
         output = socket.getOutputStream();
+        outBytes = new ByteArrayOutputStream();
     }
 
-    public Socket getSocket() { return socket; }
+    public Socket getSocket() {
+        return socket;
+    }
+
     public OutputStream getOutput() {
         return output;
     }
-    public BufferedInputStream getBuffedInput() { return buffed; }
+
+    public BufferedInputStream getBuffedInput() {
+        return buffed;
+    }
+
+    public BufferedReader getReader() {
+        return reader;
+    }
+
+    public int getContentLength() {
+        return contentLength;
+    }
+
+    public byte[] getBody() {
+        return body;
+    }
 }
 
 class TestConnectionFactory implements ConnectionFactory {
@@ -47,7 +76,7 @@ class TestConnectionFactory implements ConnectionFactory {
     }
 
     @Override
-    public TestConnection createConnection(SocketHost host, Socket socket, Router router) {
+    public TestConnection createConnection(SocketHost host, Socket socket, Router router) throws IOException {
         connection = new TestConnection(host, socket, router);
         return connection;
     }
@@ -61,7 +90,7 @@ class TestConnectionFactory implements ConnectionFactory {
 
 class TestConnection extends HttpConnection {
 
-    public TestConnection(SocketHost host, Socket socket, Router router) {
+    public TestConnection(SocketHost host, Socket socket, Router router) throws IOException {
         super(host, socket, router);
     }
 }

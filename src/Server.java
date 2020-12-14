@@ -5,10 +5,8 @@ import java.util.Map;
 
 public class Server {
     private static String message;
-    private SocketHost host;
-    private HttpConnectionFactory connectionFactory;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         Map<String, String> argMap = makeArgMap(args);
         if (argMap.containsKey("-h")) {
             setUsage();
@@ -25,15 +23,20 @@ public class Server {
         }
     }
 
-    private static void startServer(Map<String, String> args) throws IOException {
+
+    private static void startServer(Map<String, String> args) throws IOException, InterruptedException {
         int port = Integer.parseInt(args.get("-p"));
-        String path = args.get("-r");
+        String root = args.get("-r");
         Router router = new Router();
-        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, path, router);
+        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, root, router);
         SocketHost host = new SocketHost(port, connectionFactory, router);
-        Responder fileResponder = new FileResponder(path);
+        registerResponders(router, root);
         host.start();
-//        host.getConnectionThread().join();
+        host.getConnectorThread().join();
+    }
+
+    public static void registerResponders(Router router, String root) {
+        router.registerResponder("GET", ".*", new FileResponder(root));
     }
 
     private static Map<String, String> makeArgMap(String[] args) {
@@ -112,11 +115,4 @@ public class Server {
         return message;
     }
 
-    public SocketHost getHost() {
-        return host;
-    }
-
-    public ConnectionFactory getConnectionFactory() {
-        return connectionFactory;
-    }
 }
