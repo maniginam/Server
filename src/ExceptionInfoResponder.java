@@ -1,3 +1,5 @@
+import com.sun.deploy.cache.BaseLocalApplicationProperties;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,15 +9,17 @@ public class ExceptionInfoResponder implements Responder {
     Map<String, String> header;
     private byte[] body;
     private boolean bodyIsSet;
+    private String serverName;
+    private Request request;
 
-    public ExceptionInfoResponder() {
+    public ExceptionInfoResponder(String serverName) {
+        this.serverName = serverName;
         response = new Response();
     }
 
-    @Override
-    public Response respond(Request request) throws IOException {
-        bodyIsSet = false;
-        setBody(request.get("message"));
+    public Response respond(Request request) throws IOException, ExceptionInfo {
+        this.request = request;
+        setBody();
         setHeader();
         setResponse();
         return response;
@@ -24,13 +28,15 @@ public class ExceptionInfoResponder implements Responder {
     @Override
     public void setHeader() throws IOException {
         if(!bodyIsSet)
-            setBody(request.get("message"));
+            setBody();
         header = new HashMap<>();
+        header.put("Server", serverName);
         header.put("Content-Length", String.valueOf(body.length));
     }
 
     @Override
-    public void setBody(String message) throws IOException {
+    public void setBody() throws IOException {
+        String message = request.get("message");
         bodyIsSet = true;
         body = ("<h1>" + message + "</h1>").getBytes();
     }

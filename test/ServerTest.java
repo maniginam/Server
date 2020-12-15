@@ -15,7 +15,7 @@ public class ServerTest {
 
     @BeforeEach
     public void setup() throws IOException, InterruptedException {
-        helper = new TestHelper();
+        helper = new TestHelper(1003);
         server = new Server();
     }
 

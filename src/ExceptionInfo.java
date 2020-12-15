@@ -1,16 +1,18 @@
 import java.io.IOException;
 
 public class ExceptionInfo extends Throwable {
+    public static String serverName;
+    private ExceptionInfoResponder responder;
     private final Request request;
     private final Response response;
     private String message;
 
-    public ExceptionInfo (String message) throws IOException {
+    public ExceptionInfo(String message) throws IOException, ExceptionInfo {
         super(message);
         this.setMessage(message);
         request = new Request();
         request.put("message", message);
-        Responder responder = new ExceptionInfoResponder();
+        responder = new ExceptionInfoResponder(serverName);
         response = responder.respond(request);
     }
 

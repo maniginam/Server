@@ -45,7 +45,6 @@ public class HttpConnection implements Connection {
                             request = parser.parse(requestBytes);
                             isHeaderComplete = parser.isHeaderComplete();
                         }
-
                         responseMap = router.route(request);
                     } catch (ExceptionInfo e) {
                         responseMap = e.getResponse();
@@ -65,7 +64,7 @@ public class HttpConnection implements Connection {
             host.getConnections().remove(this);
         }
 
-        private void send ( byte[] response) throws IOException {
+        private void send (byte[] response) throws IOException {
             output.write(response);
         }
 

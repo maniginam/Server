@@ -18,7 +18,7 @@ public class ResponderTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        helper = new TestHelper();
+        helper = new TestHelper(4321);
         parser = new RequestParser();
         requestMap = new Request();
         response = new Response();
@@ -29,7 +29,7 @@ public class ResponderTest {
         String request = "GET HTTP/1.1\r\n\r\n";
         String root = helper.root;
         requestMap = parser.parse(request.getBytes());
-        responder = new FileResponder(root);
+        responder = new FileResponder("Rex's Server", root);
         response = responder.respond(requestMap);
         helper.setResource("/index.html");
         byte[] body = helper.getBody();
@@ -38,6 +38,7 @@ public class ResponderTest {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Length", String.valueOf(contentLength));
         headers.put("Content-Type", "text/html");
+        headers.put("Server", "Rex's Server");
         Map<String, Object> target = new HashMap<String, Object>();
         target.put("statusCode", "HTTP/1.1 200 OK");
         target.put("headers", headers);

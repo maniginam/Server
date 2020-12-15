@@ -2,7 +2,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
@@ -19,7 +18,7 @@ public class SocketHostTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        helper = new TestHelper();
+        helper = new TestHelper(1003);
         connectionFactory = new TestConnectionFactory(3141, helper.root);
         router = new Router();
         host = new SocketHost(3141, connectionFactory, router);

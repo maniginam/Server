@@ -7,7 +7,7 @@ public class Server {
     private static String message;
     private static int port;
     private static String root;
-    private static String serverName = "Gina's HttpServer";
+    private static String serverName = "Gina's Http Server";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Map<String, String> argMap = makeArgMap(args);
@@ -37,7 +37,14 @@ public class Server {
     }
 
     public static void registerResponders(Router router, String root) {
-        router.registerResponder("GET", "/.*{1}?", new FileResponder(root));
+        ExceptionInfo.serverName = serverName;
+        router.registerResponder("GET", "([\\/\\w\\.])+(.html)$", new FileResponder(serverName, root));
+        router.registerResponder("GET", "/listing", new ListingResponder(serverName, root));
+        router.registerResponder("GET", "/listing/img", new ListingResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(.jpeg)$", new ImageResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(.jpg)$", new ImageResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(.png)$", new ImageResponder(serverName, root));
+        router.registerResponder("GET", "([\\/\\w\\.])+(.pdf)$", new FileResponder(serverName, root));
     }
 
     private static Map<String, String> makeArgMap(String[] args) {
