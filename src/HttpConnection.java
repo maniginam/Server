@@ -9,6 +9,7 @@ public class HttpConnection implements Connection {
     private RequestParser parser;
     private ResponseBuilder builder;
     private OutputStream output;
+    private Response responseMap;
 
     public HttpConnection(SocketHost host, Socket socket, Router router) throws IOException {
         this.host = host;
@@ -31,59 +32,64 @@ public class HttpConnection implements Connection {
             boolean isHeaderComplete = parser.isHeaderComplete();
             builder = new ResponseBuilder();
 
-            while(host.isRunning() && socket.isConnected()) {
+            while (host.isRunning() && socket.isConnected()) {
                 if (buffedInput.available() > 0) {
                     RequestParser parser = new RequestParser();
                     ByteArrayOutputStream requestHeader = new ByteArrayOutputStream();
                     byte[] requestBytes = requestHeader.toByteArray();
                     Request request = null;
-                    while(!isHeaderComplete) {
-                        requestHeader.write(buffedInput.read());
-                        requestBytes = requestHeader.toByteArray();
-                        try {
+                    try {
+                        while (!isHeaderComplete) {
+                            requestHeader.write(buffedInput.read());
+                            requestBytes = requestHeader.toByteArray();
                             request = parser.parse(requestBytes);
-                        } catch (ExceptionInfo e) {
-                            request.put("method", "BAD");
-                            request.put("resource", e.getMessage());
+                            isHeaderComplete = parser.isHeaderComplete();
                         }
-                        isHeaderComplete = parser.isHeaderComplete();
-                    }
-                    Response responseMap = router.route(request);
-                    byte[] response = builder.buildResponse(responseMap);
 
-                    if (response != null) {
-                        send(response);
-                        output.flush();
+                        responseMap = router.route(request);
+                    } catch (ExceptionInfo e) {
+                        responseMap = e.getResponse();
                     }
+                        byte[] response = builder.buildResponse(responseMap);
 
-                } else Thread.sleep(1);
+                        if (response != null) {
+                            send(response);
+                            output.flush();
+                        }
+
+                    } else Thread.sleep(1);
+                }
+            } catch(IOException | InterruptedException e){
+                e.printStackTrace();
             }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            host.getConnections().remove(this);
         }
-        host.getConnections().remove(this);
-    }
 
-    private void send(byte[] response) throws IOException {
-        output.write(response);
-    }
+        private void send ( byte[] response) throws IOException {
+            output.write(response);
+        }
 
-    public void stop() throws InterruptedException {
-        if (thread != null)
-            thread.join();
-    }
+        public void stop () throws InterruptedException {
+            if (thread != null)
+                thread.join();
+        }
 
-    public Thread getThread() {
-        return thread;
-    }
+        public Thread getThread () {
+            return thread;
+        }
 
-    public RequestParser getParser() {
-        return parser;
-    }
+        @Override
+        public Router getRouter () {
+            return router;
+        }
 
-    @Override
-    public ResponseBuilder getResponseBuilder() {
-        return builder;
-    }
+        public RequestParser getParser () {
+            return parser;
+        }
 
-}
+        @Override
+        public ResponseBuilder getResponseBuilder () {
+            return builder;
+        }
+
+    }

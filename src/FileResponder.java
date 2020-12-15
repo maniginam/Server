@@ -25,7 +25,7 @@ public class FileResponder implements Responder {
     }
     @Override
     public void setResponse() {
-        response.put("status", 200);
+        response.put("statusCode", 200);
         response.put("headers", header);
         response.put("body", body);
     }

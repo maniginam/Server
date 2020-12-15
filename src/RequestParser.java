@@ -16,7 +16,7 @@ public class RequestParser {
 
     public Request parse(byte[] request) throws IOException, ExceptionInfo {
         requestMap = new Request();
-            extractHeader(request);
+        extractHeader(request);
         return requestMap;
     }
 
@@ -26,7 +26,9 @@ public class RequestParser {
             isHeaderComplete = true;
             String startLine = header.split("\r\n")[0];
             splitStartLine(startLine);
-        } else { requestMap = null; }
+        } else {
+            requestMap = null;
+        }
     }
 
     private void splitStartLine(String startLine) throws IOException, ExceptionInfo {
@@ -36,13 +38,13 @@ public class RequestParser {
             requestMap.put("httpVersion", "HTTP/1.1");
             requestMap.put("method", extractMethod(method));
             requestMap.put("resource", extractResource(startLineParts));
-        } else throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
+        } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
     }
 
     private String extractMethod(String method) throws ExceptionInfo, IOException {
         if (methods.contains(method))
             return method;
-        else throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
+        else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
     }
 
     private String extractResource(String[] startLine) throws ExceptionInfo, IOException {
@@ -51,7 +53,7 @@ public class RequestParser {
             if (!startLine[1].matches("/"))
                 resource = startLine[1];
         } else if (startLine.length != 2)
-            throw new ExceptionInfo("<h1>The page you are looking for is 93 million miles away!</h1>");
+            throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         return resource;
     }
 

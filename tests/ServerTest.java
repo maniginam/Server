@@ -108,7 +108,7 @@ public class ServerTest {
     }
 
     @Test
-    public void registersFileResponder() throws IOException {
+    public void registersFileResponder() throws IOException, ExceptionInfo {
         Router router = new Router();
         server.registerResponders(router, helper.root);
         Request request = new Request();

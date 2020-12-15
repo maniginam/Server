@@ -45,7 +45,7 @@ public class ResponseBuilderTest {
         builder = new ResponseBuilder();
         byte[] result = builder.buildResponse(response);
 
-        assertEquals("HTTP/1.1 200 OK\r\n", builder.getStatus());
+        assertEquals("HTTP/1.1 200 OK\r\n", builder.getStatusLine());
         assertEquals("Content-Length: " + helper.getContentLength() + "\r\n" +
                 "Content-Type: text/html\r\n\r\n", builder.getHeaders());
         assertArrayEquals(helper.getBody(), builder.getBody());

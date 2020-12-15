@@ -7,6 +7,7 @@ public class Server {
     private static String message;
     private static int port;
     private static String root;
+    private static String serverName = "Gina's HttpServer";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Map<String, String> argMap = makeArgMap(args);
@@ -37,7 +38,6 @@ public class Server {
 
     public static void registerResponders(Router router, String root) {
         router.registerResponder("GET", "/.*{1}?", new FileResponder(root));
-        router.registerResponder("BAD", "bad", new GarbageResponder());
     }
 
     private static Map<String, String> makeArgMap(String[] args) {

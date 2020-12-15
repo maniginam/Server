@@ -18,24 +18,21 @@ public class Router {
         resourceRegexs = new ArrayList<>();
     }
 
-    public Response route(Request request) throws IOException {
+    public Response route(Request request) throws IOException, ExceptionInfo {
         resource = request.get("resource");
         method = request.get("method");
+        responderPointer = null;
         for (String resourceRegex : resourceRegexs) {
-            System.out.println("resource = " + resource);
-            System.out.println("resourceRegex = " + resourceRegex);
             if (Pattern.matches(resourceRegex, resource)) {
                 responderPointer = resourceRegex;
-                break;
-            }
-            else {
-                method = "BAD";
-                responderPointer = "bad";
             }
         }
-        responder = methods.get(method).get(responderPointer);
-        Response response = responder.respond(request);
-        return response;
+
+        if (responderPointer != null && methods.containsKey(method)) {
+            responder = methods.get(method).get(responderPointer);
+            Response response = responder.respond(request);
+            return response;
+        } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
     }
 
     public void registerResponder(String method, String resourceRegex, Responder responder) {
@@ -52,4 +49,5 @@ public class Router {
     public Responder getResponder() {
         return responder;
     }
+
 }

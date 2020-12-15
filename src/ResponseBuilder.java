@@ -6,7 +6,7 @@ import java.util.Set;
 public class ResponseBuilder {
     private ByteArrayOutputStream response;
     private Response responseMap;
-    private String status;
+    private String statusLine;
     private String headers;
     private byte[] body;
 
@@ -23,8 +23,12 @@ public class ResponseBuilder {
     }
 
     private void writeStatusLIne() throws IOException {
-        status = "HTTP/1.1 " + responseMap.get("status") + " OK\r\n";
-        response.write(status.getBytes());
+        int statusCode = (int) responseMap.get("statusCode");
+        if (statusCode == 200)
+            statusLine = "HTTP/1.1 " + statusCode + " OK\r\n";
+        else if (statusCode == 404)
+            statusLine = "HTTP/1.1 " + statusCode + " page not found\r\n";
+        response.write(statusLine.getBytes());
     }
 
     private void writeHeaders() throws IOException {
@@ -48,8 +52,8 @@ public class ResponseBuilder {
         return response.toByteArray();
     }
 
-    public String getStatus() {
-        return status;
+    public String getStatusLine() {
+        return statusLine;
     }
 
     public String getHeaders() {

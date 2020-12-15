@@ -39,11 +39,11 @@ public class ResponderTest {
         headers.put("Content-Length", String.valueOf(contentLength));
         headers.put("Content-Type", "text/html");
         Map<String, Object> target = new HashMap<String, Object>();
-        target.put("status", "HTTP/1.1 200 OK");
+        target.put("statusCode", "HTTP/1.1 200 OK");
         target.put("headers", headers);
         target.put("body", body);
 
-        assertEquals(200, response.get("status"));
+        assertEquals(200, response.get("statusCode"));
         assertEquals(headers, response.get("headers"));
         assertArrayEquals(body, (byte[]) response.get("body"));
     }

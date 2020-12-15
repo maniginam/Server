@@ -7,4 +7,5 @@ public interface Connection extends Runnable {
 
     Thread getThread();
 
+    Router getRouter();
 }

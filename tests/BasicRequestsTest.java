@@ -42,6 +42,13 @@ public class BasicRequestsTest {
         return connection.getResponseBuilder();
     }
 
+    private ByteArrayOutputStream getFullTargetOutputArray(String responseStatus, String responseHeader) throws IOException {
+        ByteArrayOutputStream target = new ByteArrayOutputStream();
+        target.write((responseStatus + responseHeader).getBytes());
+        target.write(builder.getBody());
+        return target;
+    }
+
     @Test
     public void submitBlankTargetRequest() throws IOException, ExceptionInfo, InterruptedException {
         host.start();
@@ -57,14 +64,15 @@ public class BasicRequestsTest {
         connection = host.getConnections().get(0);
         builder = connectionBuilder(connection);
         byte[] result = builder.getResponse();
-        String responseStatus = builder.getStatus();
+        String responseStatus = builder.getStatusLine();
         String responseHeader = builder.getHeaders();
         String responseBodyMsg = readResponseBodyResult(builder.getBody());
+        ByteArrayOutputStream target = getFullTargetOutputArray(responseStatus, responseHeader);
 
+        assertArrayEquals(target.toByteArray(), result);
         assertEquals("HTTP/1.1 200 OK\r\n", responseStatus);
         assertEquals("Content-Length: " + helper.getContentLength() + "\r\n" +
                 "Content-Type: text/html\r\n\r\n", responseHeader);
-        assertArrayEquals(result, result);
         assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
     }
 
@@ -83,14 +91,15 @@ public class BasicRequestsTest {
         connection = host.getConnections().get(0);
         builder = connectionBuilder(connection);
         byte[] result = builder.getResponse();
-        String responseStatus = builder.getStatus();
+        String responseStatus = builder.getStatusLine();
         String responseHeader = builder.getHeaders();
         String responseBodyMsg = readResponseBodyResult(builder.getBody());
+        ByteArrayOutputStream target = getFullTargetOutputArray(responseStatus, responseHeader);
 
+        assertArrayEquals(target.toByteArray(), result);
         assertEquals("HTTP/1.1 200 OK\r\n", responseStatus);
         assertEquals("Content-Length: " + helper.getContentLength() + "\r\n" +
                 "Content-Type: text/html\r\n\r\n", responseHeader);
-        assertArrayEquals(result, result);
         assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
     }
 
@@ -109,14 +118,15 @@ public class BasicRequestsTest {
         connection = host.getConnections().get(0);
         builder = connectionBuilder(connection);
         byte[] result = builder.getResponse();
-        String responseStatus = builder.getStatus();
+        String responseStatus = builder.getStatusLine();
         String responseHeader = builder.getHeaders();
         String responseBodyMsg = readResponseBodyResult(builder.getBody());
+        ByteArrayOutputStream target = getFullTargetOutputArray(responseStatus, responseHeader);
 
+        assertArrayEquals(target.toByteArray(), result);
         assertEquals("HTTP/1.1 200 OK\r\n", responseStatus);
         assertEquals("Content-Length: " + helper.getContentLength() + "\r\n" +
                 "Content-Type: text/html\r\n\r\n", responseHeader);
-        assertArrayEquals(result, result);
         assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
     }
 
@@ -128,19 +138,26 @@ public class BasicRequestsTest {
         buffed = helper.getBuffedInput();
 
         String request = "GET Leo HTTP/1.1\r\n\r\n";
+        String errorMsg = "<h1>The page you are looking for is 93 million miles away!</h1>";
         output.write(request.getBytes());
         buffed.read();
 
         connection = host.getConnections().get(0);
+        Request requestMap = connection.getParser().parse(request.getBytes());
         builder = connectionBuilder(connection);
         byte[] result = builder.getResponse();
-        String responseStatus = builder.getStatus();
+        String responseStatus = builder.getStatusLine();
         String responseHeader = builder.getHeaders();
         String responseBodyMsg = readResponseBodyResult(builder.getBody());
+        ByteArrayOutputStream target = getFullTargetOutputArray(responseStatus, responseHeader);
 
         assertThrows(ExceptionInfo.class, () -> {
-            connection.getParser().parse(request.getBytes());
+            connection.getRouter().route(requestMap);
         });
+        assertArrayEquals(target.toByteArray(), result);
+        assertEquals("HTTP/1.1 404 page not found\r\n", responseStatus);
+        assertTrue(responseHeader.contains("Content-Length: " + errorMsg.length()));
+        assertEquals(errorMsg, responseBodyMsg);
     }
 //
 //
