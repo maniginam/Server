@@ -2,3 +2,5 @@
 /shelf/
 *.iml
 *.xml
+*pom.
+server.iml
