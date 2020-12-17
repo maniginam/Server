@@ -1,0 +1,26 @@
+-------------------------------------------------------------------------------
+Test set: serverTests.ServerTest
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 2, Errors: 1, Skipped: 0, Time elapsed: 0.005 s <<< FAILURE! - in serverTests.ServerTest
+messageOnlyFromPEntryWithNOX  Time elapsed: 0 s  <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+expected: <Example http.Server
+Running on port: 3141.
+Serving files from: /Users/maniginam/server> but was: <Example http.Server
+Running on port: 3141.
+Serving files from: /Users/maniginam/server/my-app>
+	at serverTests.ServerTest.messageOnlyFromPEntryWithNOX(ServerTest.java:115)
+
+submitREntry  Time elapsed: 0 s  <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+expected: <Example http.Server
+Running on port: 80.
+Serving files from: /Users/maniginam/server/testroot> but was: <Example http.Server
+Running on port: 80.
+Serving files from: /Users/maniginam/server/my-app/testroot>
+	at serverTests.ServerTest.submitREntry(ServerTest.java:100)
+
+registersFileResponder  Time elapsed: 0.001 s  <<< ERROR!
+server.ExceptionInfo: The page you are looking for is 93 million miles away!
+	at serverTests.ServerTest.registersFileResponder(ServerTest.java:126)
+

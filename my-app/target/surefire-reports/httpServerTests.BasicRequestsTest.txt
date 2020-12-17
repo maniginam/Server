@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: httpServerTests.BasicRequestsTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.021 s <<< FAILURE! - in httpServerTests.BasicRequestsTest
+submitSlashTargetRequest  Time elapsed: 0.003 s  <<< ERROR!
+java.lang.NullPointerException: Cannot read the array length because "<local7>" is null
+	at httpServerTests.BasicRequestsTest.submitSlashTargetRequest(BasicRequestsTest.java:101)
+
+submitIndexTargetRequest  Time elapsed: 0.003 s  <<< ERROR!
+java.lang.NullPointerException: Cannot read the array length because "<local7>" is null
+	at httpServerTests.BasicRequestsTest.submitIndexTargetRequest(BasicRequestsTest.java:128)
+
+submitBlankTargetRequest  Time elapsed: 0.003 s  <<< ERROR!
+java.lang.NullPointerException: Cannot read the array length because "<local7>" is null
+	at httpServerTests.BasicRequestsTest.submitBlankTargetRequest(BasicRequestsTest.java:74)
+

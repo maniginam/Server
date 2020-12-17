@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: httpServerTests.ResponseBuilderTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.001 s <<< FAILURE! - in httpServerTests.ResponseBuilderTest
+buildBlankResourceResponse  Time elapsed: 0.001 s  <<< ERROR!
+server.ExceptionInfo: The page you are looking for is 93 million miles away!
+	at httpServerTests.ResponseBuilderTest.buildBlankResourceResponse(ResponseBuilderTest.java:41)
+
