@@ -51,7 +51,6 @@ public class MultiPartResponder implements Responder {
                 "<li>file name: " + String.valueOf(request.get("fileName")).replace("\"", "") + "</li>" +
                 "<li>file size: " + request.get("fileSize") + "</li>" +
                 "<li>content type: " + type + "</li>";
-        System.out.println("bodyMsg = " + bodyMsg);
         body = bodyMsg.getBytes();
     }
 }

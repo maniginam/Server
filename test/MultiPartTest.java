@@ -46,10 +46,10 @@ public class MultiPartTest {
         String boundary = "Rex&LeoBoundary";
         String multipart1 = "Content-Disposition: form-data; name=\"file\"; filename=\"BruslyDog.jpeg\r\n" +
                 "Content-Type: image/jpeg\r\n\r\n";
-        int contentLength = ("--" + boundary
+        int contentLength = ("--" + boundary + "\r\n"
                 + multipart1 + "\r\n"
-                + "--" + boundary + "--").getBytes().length
-                + helper.getContentLength() + 4;
+                + "--" + boundary + "--\r\n").getBytes().length
+                + helper.getContentLength();
         String requestHeader = "POST /form HTTP/1.1\r\n" +
                 "Content-Length: " + contentLength + "\r\n" +
                 "Content-Type: multipart/form-data; boundary=" + boundary + "\r\n\r\n";

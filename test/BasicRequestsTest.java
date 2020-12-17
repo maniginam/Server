@@ -175,24 +175,25 @@ public class BasicRequestsTest {
         buffed = helper.getBuffedInput();
 
         String request = "REX /index.html HTTP/1.1\r\n\r\n";
-        String errorMsg = "<h1>The page you are looking for is 93 million miles away!</h1>";
+        String errorMsg = "<h1>The page you are looking for is 93 million miles away!  And the method REX you requested is not valid!</h1>";
         output.write(request.getBytes());
         buffed.read();
 
         connection = host.getConnections().get(0);
         builder = getConnectionBuilder(connection);
+        Request requestMap = connection.getParser().parse(request.getBytes());
         byte[] result = builder.getResponse();
         String responseBodyMsg = readResponseBodyResult(builder.getBody());
         ByteArrayOutputStream target = getFullTargetOutputArray();
 
-//        assertThrows(ExceptionInfo.class, () -> {
-//            connection.getParser().parse(request.getBytes());
-//        });
+        assertThrows(ExceptionInfo.class, () -> {
+            connection.getRouter().route(requestMap);
+        });
         assertArrayEquals(target.toByteArray(), result);
         assertEquals("HTTP/1.1 404 page not found\r\n", getResponseStatus());
-        assertTrue(getResponseHeader().contains("Content-Length: " + "<h1>The page you are looking for is 93 million miles away!  And the method REX you requested is not valid!</h1>".length()));
+        assertTrue(getResponseHeader().contains("Content-Length: " + errorMsg.length()));
         assertTrue(getResponseHeader().contains("Server: Gina's Http Server"));
-        assertEquals("<h1>The page you are looking for is 93 million miles away!  And the method REX you requested is not valid!</h1>", responseBodyMsg);
+        assertEquals(errorMsg, responseBodyMsg);
     }
 }
 

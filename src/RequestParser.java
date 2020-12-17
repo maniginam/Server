@@ -1,3 +1,4 @@
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -58,19 +59,24 @@ public class RequestParser {
         }
     }
 
-    public Request parseParts(byte[] multiPartBytes) throws IOException, ExceptionInfo {
-        String header = new String(multiPartBytes, StandardCharsets.UTF_8);
-        if (header.contains("\r\n\r\n")) {
+    public Request parseMultiPart(byte[] multiPartBytes) throws IOException, ExceptionInfo {
+        String header = "";
+        ByteArrayOutputStream headerBytes = new ByteArrayOutputStream();
+        for (int i = 0; i < multiPartBytes.length; i++) {
+            headerBytes.write(multiPartBytes[i]);
+            header = new String(headerBytes.toByteArray(), StandardCharsets.UTF_8);
+            if (header.contains("\r\n\r\n")) {
+                break;
+            }
+        }
             partHeaderSize = header.length();
-            // TODO: 12/17/20 ASK ABOUT THIS LENGTH!!!
-            int fileSize = contentLength - partHeaderSize - String.valueOf(requestMap.get("boundary")).length() - 8;
+            int fileSize = multiPartBytes.length - header.length() - ("\r\n--" + requestMap.get("boundary") + "--\r\n").length() ;
             requestMap.put("fileSize", fileSize);
             partHeaderDone = true;
             doneParsing = true;
             String[] headers = header.split("\r\n");
             for (String line : headers)
                 splitHeaders(line);
-        }
         return requestMap;
     }
 

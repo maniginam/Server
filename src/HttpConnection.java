@@ -1,7 +1,5 @@
 import java.io.*;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
 
 public class HttpConnection implements Connection {
     private final Socket socket;
@@ -45,31 +43,21 @@ public class HttpConnection implements Connection {
                     Request request = null;
                     try {
                         while (!headerDone) {
-                            if (!headerDone) {
                                 requestHeader.write(buffedInput.read());
                                 requestBytes = requestHeader.toByteArray();
                                 request = parser.parse(requestBytes);
                                 headerDone = getParser().isHeaderComplete();
-                                doneParsing = getParser().doneParsing();
-                            }
                         }
                         if (getParser().getIsMultiPartRequest()) {
-                            int contentLength = 0;
-                            partHeader.write(buffedInput.read());
+                            int contentLength;
                             if (request != null)
                                 contentLength = Integer.parseInt((String) request.get("Content-Length"));
-                            while(!doneParsing) {
-                                if(!parser.getPartHeaderDone()) {
-                                    partHeader.write(buffedInput.read());
-                                    Request partRequest = new Request();
-                                    partRequest = parser.parseParts(partHeader.toByteArray());
-                                    for (String key : partRequest.keySet()) {
-                                        request.put(key, partRequest.get(key));
-                                    }
-                                }
-                                doneParsing = getParser().doneParsing();
+                            else contentLength = 0;
+                            byte[] body = new byte[contentLength];
+                            for (int i = 0; i < contentLength; i++) {
+                                body[i] = (byte) buffedInput.read();
                             }
-
+                            parser.parseMultiPart(body);
                         }
 
                         responseMap = router.route(request);
