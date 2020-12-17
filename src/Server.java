@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class Server {
     private static String message;
@@ -39,12 +40,14 @@ public class Server {
     public static void registerResponders(Router router, String root) {
         ExceptionInfo.serverName = serverName;
         router.registerResponder("GET", "([\\/\\w\\.])+(.html)$", new FileResponder(serverName, root));
-        router.registerResponder("GET", "/listing", new ListingResponder(serverName, root));
-        router.registerResponder("GET", "/listing/img", new ListingResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(.jpeg)$", new ImageResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(.jpg)$", new ImageResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(.png)$", new ImageResponder(serverName, root));
+        router.registerResponder("GET", "([/listing])+([/img]*)$", new ListingResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(jpeg)$", new ImageResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(jpg)$", new ImageResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(png)$", new ImageResponder(serverName, root));
         router.registerResponder("GET", "([\\/\\w\\.])+(.pdf)$", new FileResponder(serverName, root));
+        router.registerResponder("GET", "([/ping\\/*])+(\\d*)", new PingResponder(serverName));
+        router.registerResponder("GET", "([/form\\?])(.*=.*)(&.*=.*)*", new FormResponder(serverName));
+        router.registerResponder("POST", "/form", new MultiPartResponder(serverName));
     }
 
     private static Map<String, String> makeArgMap(String[] args) {

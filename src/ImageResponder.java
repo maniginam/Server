@@ -22,21 +22,25 @@ public class ImageResponder implements Responder {
     public Response respond(Request request) throws IOException, ExceptionInfo {
         this.request = request;
         setBody();
-        setHeader();
-        setResponse();
+        String resource = String.valueOf(request.get("resource"));
+        String fileType = resource.split("\\.")[resource.split("\\.").length - 1];
+        if (fileType.contains("jpg"))
+            fileType = "jpeg";
+        setHeader("image/" + fileType);
+        setResponse(200);
         return response;
     }
 
     @Override
-    public void setResponse() {
-        response.put("statusCode", 200);
+    public void setResponse(int statusCode) {
+        response.put("statusCode", statusCode);
         response.put("headers", header);
         response.put("body", body);
     }
 
     @Override
     public void setBody() throws ExceptionInfo, IOException {
-        String resource = request.get("resource");
+        String resource = String.valueOf(request.get("resource"));
         Path path = Paths.get((root + resource));
         try {
             File file = new File(root + resource);
@@ -56,15 +60,10 @@ public class ImageResponder implements Responder {
     }
 
     @Override
-    public void setHeader() {
-        String fileType = request.get("resource").split("\\.")[request.get("resource").split("\\.").length - 1];
-        if (fileType.contains("jpg"))
-            fileType = "jpeg";
+    public void setHeader(String type) {
         header = new HashMap<>();
         header.put("Server", serverName);
-        header.put("Content-Type", "image/" + fileType);
+        header.put("Content-Type", type);
         header.put("Content-Length", String.valueOf(body.length));
     }
-
-
 }

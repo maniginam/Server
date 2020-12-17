@@ -1,5 +1,3 @@
-import com.sun.deploy.cache.BaseLocalApplicationProperties;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,16 +20,16 @@ public class ListingResponder implements Responder {
     public Response respond(Request request) throws IOException, ExceptionInfo {
         this.request = request;
         setBody();
-        setHeader();
-        setResponse();
+        setHeader("text/html");
+        setResponse(200);
         return response;
     }
 
     @Override
-    public void setHeader() throws IOException {
+    public void setHeader(String type) throws IOException {
         header = new HashMap<>();
         header.put("Server", serverName);
-        header.put("Content-Type", "text/html");
+        header.put("Content-Type", type);
         header.put("Content-Length", String.valueOf(body.length));
     }
 
@@ -39,7 +37,7 @@ public class ListingResponder implements Responder {
     public void setBody() throws IOException, ExceptionInfo {
         File directory;
         String p = "";
-        if (request.get("resource").contains("img")) {
+        if (String.valueOf(request.get("resource")).contains("img")) {
             directory = new File(root + "/img");
             p = "/img";
         } else
@@ -59,8 +57,8 @@ public class ListingResponder implements Responder {
     }
 
     @Override
-    public void setResponse() {
-        response.put("statusCode", 200);
+    public void setResponse(int statusCode) {
+        response.put("statusCode", statusCode);
         response.put("headers", header);
         response.put("body", body);
     }

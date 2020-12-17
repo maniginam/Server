@@ -4,9 +4,9 @@ public interface Responder {
 
     Response respond(Request requestMap) throws IOException, ExceptionInfo;
 
-    void setHeader() throws IOException;
+    void setHeader(String type) throws IOException, ExceptionInfo;
 
     void setBody() throws IOException, ExceptionInfo;
 
-    void setResponse();
+    void setResponse(int statusCode);
 }

@@ -22,21 +22,24 @@ public class FileResponder implements Responder {
     public Response respond(Request request) throws IOException, ExceptionInfo {
         this.request = request;
         setBody();
-        setHeader();
-        setResponse();
+        String type = "text/html";
+        if (String.valueOf(request.get("resource")).contains(".pdf"))
+            type = "application/pdf";
+        setHeader(type);
+        setResponse(200);
         return response;
     }
 
     @Override
-    public void setResponse() {
-        response.put("statusCode", 200);
+    public void setResponse(int statusCode) {
+        response.put("statusCode", statusCode);
         response.put("headers", header);
         response.put("body", body);
     }
 
     @Override
     public void setBody() throws ExceptionInfo, IOException {
-        String resource = request.get("resource");
+        String resource = String.valueOf(request.get("resource"));
         Path path = Paths.get((root + resource));
         try {
             body = Files.readAllBytes(path);
@@ -47,14 +50,10 @@ public class FileResponder implements Responder {
     }
 
     @Override
-    public void setHeader() {
+    public void setHeader(String type) {
         header = new HashMap<>();
         header.put("Server", serverName);
-        // TODO: 12/15/20 FIX THIS! 
-        if (request.get("resource").contains(".html"))
-            header.put("Content-Type", "text/html");
-        else if (request.get("resource").contains(".pdf"))
-            header.put("Content-Type", "application/pdf");
+        header.put("Content-Type", type);
         header.put("Content-Length", String.valueOf(body.length));
     }
 

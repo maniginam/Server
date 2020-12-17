@@ -57,6 +57,7 @@ public class FilesTests {
         connection = host.getConnections().get(0);
         builder = helper.getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
+        byte[] responseBody = builder.getBody();
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof ListingResponder);
@@ -65,10 +66,10 @@ public class FilesTests {
         assertEquals("Server: Gina's Http Server\r\n" +
                 "Content-Length: " + helper.getContentLength() + "\r\n" +
                 "Content-Type: text/html\r\n\r\n", helper.getResponseHeader());
-        assertTrue(helper.readResponseBodyResult(helper.getBody()).contains("<ul>"));
-        assertTrue(helper.readResponseBodyResult(helper.getBody()).contains("<li><a href=\"/index.html\">index.html</a></li>"));
-        assertTrue(helper.readResponseBodyResult(helper.getBody()).contains("<li><a href=\"/hello.pdf\">hello.pdf</a></li>"));
-        assertTrue(helper.readResponseBodyResult(helper.getBody()).contains("<li><a href=\"/listing/img\">img</a></li>"));
+        assertTrue(helper.readResponseBodyResult(responseBody).contains("<ul>"));
+        assertTrue(helper.readResponseBodyResult(responseBody).contains("<li><a href=\"/index.html\">index.html</a></li>"));
+        assertTrue(helper.readResponseBodyResult(responseBody).contains("<li><a href=\"/hello.pdf\">hello.pdf</a></li>"));
+        assertTrue(helper.readResponseBodyResult(responseBody).contains("<li><a href=\"/listing/img\">img</a></li>"));
     }
 
     @Test

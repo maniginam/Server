@@ -1,5 +1,3 @@
-import com.sun.deploy.cache.BaseLocalApplicationProperties;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,30 +18,31 @@ public class ExceptionInfoResponder implements Responder {
     public Response respond(Request request) throws IOException, ExceptionInfo {
         this.request = request;
         setBody();
-        setHeader();
-        setResponse();
+        setHeader("text/html");
+        setResponse(404);
         return response;
     }
 
     @Override
-    public void setHeader() throws IOException {
+    public void setHeader(String type) throws IOException {
         if(!bodyIsSet)
             setBody();
         header = new HashMap<>();
         header.put("Server", serverName);
+        header.put("Content-Type", type);
         header.put("Content-Length", String.valueOf(body.length));
     }
 
     @Override
     public void setBody() throws IOException {
-        String message = request.get("message");
+        String message = String.valueOf(request.get("message"));
         bodyIsSet = true;
         body = ("<h1>" + message + "</h1>").getBytes();
     }
 
     @Override
-    public void setResponse() {
-        response.put("statusCode", 404);
+    public void setResponse(int statusCode) {
+        response.put("statusCode", statusCode);
         response.put("headers", header);
         response.put("body", body);
     }

@@ -19,19 +19,24 @@ public class Router {
     }
 
     public Response route(Request request) throws IOException, ExceptionInfo {
-        resource = request.get("resource");
-        method = request.get("method");
-        responderPointer = null;
-        for (String resourceRegex : resourceRegexs) {
-            if (Pattern.matches(resourceRegex, resource)) {
-                responderPointer = resourceRegex;
+        if (request != null) {
+            method = String.valueOf(request.get("method"));
+            resource = String.valueOf(request.get("resource"));
+            String target = resource;
+            if (resource.contains("\r\n"))
+                target = resource.split("\r\n")[0];
+            responderPointer = null;
+            for (String resourceRegex : resourceRegexs) {
+                if (Pattern.matches(resourceRegex, target)) {
+                    responderPointer = resourceRegex;
+                }
             }
-        }
 
-        if (responderPointer != null && methods.containsKey(method)) {
-            responder = methods.get(method).get(responderPointer);
-            Response response = responder.respond(request);
-            return response;
+            if (responderPointer != null && methods.containsKey(method)) {
+                responder = methods.get(method).get(responderPointer);
+                Response response = responder.respond(request);
+                return response;
+            } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
     }
 
