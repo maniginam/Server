@@ -1,10 +1,10 @@
-package httpServerTests;
+package test.java.httpServerTests;
 
-import httpServer.*;
+import main.java.httpServer.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.*;
+import main.java.server.*;
 
 import java.io.*;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BasicRequestsTest {
-    private TestHelper helper;
+    private HttpTestHelper helper;
     private TestConnectionFactory connectionFactory;
     private Router router;
     private SocketHost host;
@@ -25,7 +25,7 @@ public class BasicRequestsTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        helper = new TestHelper(1518);
+        helper = new HttpTestHelper(1518);
         connectionFactory = new TestConnectionFactory(1518, helper.root);
         router = new Router();
         Server.registerResponders(router, helper.root);
@@ -72,6 +72,7 @@ public class BasicRequestsTest {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/index.html");
+        parser = new RequestParser(buffed);
 
         String request = "GET HTTP/1.1\r\n\r\n";
         output.write(request.getBytes());
@@ -99,6 +100,7 @@ public class BasicRequestsTest {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/index.html");
+        parser = new RequestParser(buffed);
 
         String request = "GET / HTTP/1.1\r\n\r\n";
         output.write(request.getBytes());
@@ -126,6 +128,7 @@ public class BasicRequestsTest {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/index.html");
+        parser = new RequestParser(buffed);
 
         String request = "GET /index.html HTTP/1.1\r\n\r\n";
         output.write(request.getBytes());
@@ -152,6 +155,7 @@ public class BasicRequestsTest {
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
+        parser = new RequestParser(buffed);
 
         String request = "GET /Leo HTTP/1.1\r\n\r\n";
         String errorMsg = "<h1>The page you are looking for is 93 million miles away!</h1>";
@@ -184,6 +188,7 @@ public class BasicRequestsTest {
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
+        parser = new RequestParser(buffed);
 
         String request = "REX /index.html HTTP/1.1\r\n\r\n";
         String errorMsg = "<h1>The page you are looking for is 93 million miles away!  And the method REX you requested is not valid!</h1>";
@@ -216,12 +221,11 @@ public class BasicRequestsTest {
         private Request requestMap;
         private Response response;
         private Responder responder;
-        private TestHelper helper;
+        private HttpTestHelper helper;
 
         @BeforeEach
         public void setup() throws IOException {
-            helper = new TestHelper(4321);
-            parser = new RequestParser();
+            helper = new HttpTestHelper(4321);
             requestMap = new Request();
             response = new Response();
         }
@@ -230,7 +234,7 @@ public class BasicRequestsTest {
         public void responseToBlankGET () throws IOException, ExceptionInfo {
             String request = "GET HTTP/1.1\r\n\r\n";
             String root = helper.root;
-            requestMap = parser.parse(request.getBytes());
+            requestMap = parser.parse();
             responder = new FileResponder("Rex's Server", root);
             response = responder.respond(requestMap);
             helper.setResource("/index.html");

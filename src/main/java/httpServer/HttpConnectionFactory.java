@@ -1,9 +1,6 @@
-package httpServer;
+package main.java.httpServer;
 
-import server.Connection;
-import server.ConnectionFactory;
-import server.Router;
-import server.SocketHost;
+import main.java.server.*;
 
 import java.io.IOException;
 import java.net.Socket;

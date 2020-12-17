@@ -1,4 +1,4 @@
-package server;
+package main.java.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class SocketHost {
     private final ConnectionFactory connectionFactory;
-    private final int port;
+    public final int port;
     private final Router router;
     private ServerSocket server;
     private boolean running = false;
@@ -67,15 +67,15 @@ public class SocketHost {
         return running;
     }
 
-    public int getPort() {
-        return port;
-    }
-
     public List<Connection> getConnections() {
         return connections;
     }
 
-    public Thread getConnectorThread() {
-        return connectorThread;
+    public void join() throws InterruptedException {
+        connectorThread.join();
+    }
+
+    public boolean isAlive() {
+        return connectorThread.isAlive();
     }
 }

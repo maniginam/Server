@@ -1,22 +1,17 @@
-package httpServerTests;
+package test.java.httpServerTests;
 
-import httpServer.MultiPartResponder;
-import httpServer.RequestParser;
-import httpServer.HttpResponseBuilder;
-import httpServer.Server;
+import main.java.httpServer.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.Connection;
-import server.Router;
-import server.SocketHost;
+import main.java.server.*;
 
 import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MultiPartTest {
-    private TestHelper helper;
+    private HttpTestHelper helper;
     private TestConnectionFactory connectionFactory;
     private Router router;
     private SocketHost host;
@@ -29,12 +24,11 @@ public class MultiPartTest {
     @BeforeEach
     public void setup() throws IOException {
         int port = 1988;
-        helper = new TestHelper(port);
+        helper = new HttpTestHelper(port);
         connectionFactory = new TestConnectionFactory(port, helper.root);
         router = new Router();
         Server.registerResponders(router, helper.root);
         host = new SocketHost(port, connectionFactory, router);
-        parser = new RequestParser();
     }
 
     @AfterEach
@@ -50,6 +44,7 @@ public class MultiPartTest {
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
+        parser = new RequestParser(buffed);
 
         helper.setResource("/img/BruslyDog.jpeg");
         String boundary = "Rex&LeoBoundary";

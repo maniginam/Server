@@ -1,6 +1,6 @@
-package httpServer;
+package main.java.httpServer;
 
-import server.*;
+import main.java.server.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -22,7 +22,6 @@ public class HttpConnection implements Connection {
         this.router = router;
         output = socket.getOutputStream();
         builder = new HttpResponseBuilder();
-        parser = new RequestParser();
     }
 
     public void start() {
@@ -40,17 +39,18 @@ public class HttpConnection implements Connection {
 
             while (host.isRunning() && socket.isConnected()) {
                 if (buffedInput.available() > 0) {
+                    Request request = new Request();
+                    parser = new RequestParser(buffedInput);
+                    request = parser.parse();
                     ByteArrayOutputStream requestHeader = new ByteArrayOutputStream();
-                    ByteArrayOutputStream partHeader = new ByteArrayOutputStream();
-                    ByteArrayOutputStream requestBodyBytes = new ByteArrayOutputStream();
                     byte[] requestBytes = null;
-                    Request request = null;
+
                     try {
                         while (!headerDone) {
-                                requestHeader.write(buffedInput.read());
-                                requestBytes = requestHeader.toByteArray();
-                                request = parser.parse(requestBytes);
-                                headerDone = getParser().isHeaderComplete();
+                            requestHeader.write(buffedInput.read());
+                            requestBytes = requestHeader.toByteArray();
+                            request = parser.parse();
+                            headerDone = getParser().isHeaderComplete();
                         }
                         if (getParser().getIsMultiPartRequest()) {
                             int contentLength;
@@ -68,47 +68,45 @@ public class HttpConnection implements Connection {
                     } catch (ExceptionInfo e) {
                         responseMap = e.getResponse();
                     }
-                        byte[] response = builder.buildResponse(responseMap);
-                        if (response != null) {
-                            send(response);
-                            requestBodyBytes.flush();
-                            requestHeader.flush();
-                            output.flush();
-                        }
+                    byte[] response = builder.buildResponse(responseMap);
+                    if (response != null) {
+                        send(response);
+                    }
 
-                    } else Thread.sleep(1);
-                }
-            } catch(IOException | InterruptedException e){
-                e.printStackTrace();
+                } else Thread.sleep(1);
             }
-            host.getConnections().remove(this);
+        } catch (IOException | InterruptedException | ExceptionInfo e) {
+            e.printStackTrace();
         }
-
-        private void send (byte[] response) throws IOException {
-        output.write(response);
-        }
-
-        public void stop () throws InterruptedException {
-            if (thread != null)
-                thread.join();
-        }
-
-        public Thread getThread () {
-            return thread;
-        }
-
-        @Override
-        public Router getRouter () {
-            return router;
-        }
-
-        public RequestParser getParser () {
-            return parser;
-        }
-
-
-        public HttpResponseBuilder getResponseBuilder () {
-            return builder;
-        }
-
+        host.getConnections().remove(this);
     }
+
+    private void send(byte[] response) throws IOException {
+        output.write(response);
+        output.flush();
+    }
+
+    public void stop() throws InterruptedException {
+        if (thread != null)
+            thread.join();
+    }
+
+    public Thread getThread() {
+        return thread;
+    }
+
+    @Override
+    public Router getRouter() {
+        return router;
+    }
+
+    public RequestParser getParser() {
+        return parser;
+    }
+
+
+    public HttpResponseBuilder getResponseBuilder() {
+        return builder;
+    }
+
+}

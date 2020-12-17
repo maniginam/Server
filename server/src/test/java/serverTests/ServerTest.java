@@ -87,7 +87,7 @@ public class ServerTest {
     public void submitREntry() throws Exception {
         String name = "Example http.Server\r\n";
         String portLine = "Running on port: 80.\r\n";
-        String filesLine = "Serving files from: /Users/maniginam/server/testroot";
+        String filesLine = "Serving files from: " + Files.;
         String message = name + portLine + filesLine;
 
         Map<String, String> args = new HashMap<>();

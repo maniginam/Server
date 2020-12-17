@@ -1,10 +1,7 @@
-package serverTests;
+package test.java.serverTests;
 
-import httpServer.HttpResponseBuilder;
-import server.Connection;
-import server.ConnectionFactory;
-import server.Router;
-import server.SocketHost;
+import main.java.httpServer.*;
+import main.java.server.*;
 
 import java.io.*;
 import java.net.Socket;

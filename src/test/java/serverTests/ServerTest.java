@@ -1,13 +1,9 @@
-package serverTests;
+package test.java.serverTests;
 
-import server.ExceptionInfo;
-import httpServer.FileResponder;
-import httpServer.Server;
+import main.java.server.*;
+import main.java.httpServer.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.Request;
-import server.Responder;
-import server.Router;
 
 import java.io.File;
 import java.io.IOException;

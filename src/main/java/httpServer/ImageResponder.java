@@ -1,9 +1,6 @@
-package httpServer;
+package main.java.httpServer;
 
-import server.ExceptionInfo;
-import server.Request;
-import server.Responder;
-import server.Response;
+import main.java.server.*;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -50,16 +47,7 @@ public class ImageResponder implements Responder {
         String resource = String.valueOf(request.get("resource"));
         Path path = Paths.get((root + resource));
         try {
-            File file = new File(root + resource);
-            FileInputStream input = new FileInputStream(file);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(path));
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            byte[] inputBytes = Files.readAllBytes(path);
-            output.write(inputBytes);
             body = Files.readAllBytes(path);
-
-//            body = output.toByteArray();
-
         } catch (IOException e) {
             // TODO: 12/15/20 This feels ugly--ask about this
             throw new ExceptionInfo("The page you are looking for is 93 million miles away!");

@@ -1,8 +1,8 @@
-package httpServer;
+package main.java.httpServer;
 
-import server.ExceptionInfo;
-import server.Request;
+import main.java.server.*;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +11,7 @@ import java.util.List;
 
 public class RequestParser {
     private final List<String> methods;
+    private final BufferedInputStream inputStream;
     Request requestMap = new Request();
     private boolean isHeaderComplete;
     private int contentLength;
@@ -24,7 +25,8 @@ public class RequestParser {
     private int partHeaderSize;
     private int headerSize;
 
-    public RequestParser() {
+    public RequestParser(BufferedInputStream inputStream) {
+        this.inputStream = inputStream;
         methods = new ArrayList<>();
         methods.add("GET");
         methods.add("POST");
@@ -33,32 +35,34 @@ public class RequestParser {
         statusLineSet = false;
         isMultiPartRequest = false;
         doneParsing = false;
+        requestMap = new Request();
     }
 
-    public Request parse(byte[] request) throws IOException, ExceptionInfo {
-        requestMap = new Request();
-        if (!isHeaderComplete) {
-            extractHeader(request);
-        }
+    public Request parse() throws IOException, ExceptionInfo {
+        extractHeader();
         return requestMap;
     }
 
 
-    private void extractHeader(byte[] request) throws IOException, ExceptionInfo {
-        String header = new String(request, StandardCharsets.UTF_8);
-        if (header.endsWith("\r\n\r\n")) {
-            isHeaderComplete = true;
-            headerSize = header.length();
-            String[] headers = header.split("\r\n");
-            for (String line : headers) {
-                splitHeaders(line);
-            }
-            if (requestMap.containsKey("Content-Length"))
-                contentLength = Integer.parseInt(String.valueOf(requestMap.get("Content-Length")));
-            if (contentLength > 0) {
-                isMultiPartRequest = true;
-            } else {
-                doneParsing = true;
+    private void extractHeader() throws IOException, ExceptionInfo {
+        ByteArrayOutputStream headerOutput = new ByteArrayOutputStream();
+        while (!isHeaderComplete) {
+            headerOutput.write(inputStream.read());
+            String header = new String(headerOutput.toByteArray(), StandardCharsets.UTF_8);
+            if (header.endsWith("\r\n\r\n")) {
+                isHeaderComplete = true;
+                headerSize = header.length();
+                String[] headers = header.split("\r\n");
+                for (String line : headers) {
+                    splitHeaders(line);
+                }
+                if (requestMap.containsKey("Content-Length"))
+                    contentLength = Integer.parseInt(String.valueOf(requestMap.get("Content-Length")));
+                if (contentLength > 0) {
+                    isMultiPartRequest = true;
+                } else {
+                    doneParsing = true;
+                }
             }
         }
     }

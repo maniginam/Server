@@ -1,6 +1,6 @@
-package server;
+package main.java.server;
 
-import httpServer.ExceptionInfoResponder;
+import main.java.httpServer.ExceptionInfoResponder;
 
 import java.io.IOException;
 

@@ -1,6 +1,6 @@
-package server;
+package main.java.server;
 
-import httpServer.HttpResponseBuilder;
+import main.java.httpServer.*;
 
 public interface Connection extends Runnable {
     void start();

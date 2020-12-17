@@ -1,13 +1,13 @@
-package httpServer;
+package main.java.httpServer;
 
-import server.Response;
+import main.java.server.Response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-public class HttpResponseBuilder implements server.ResponseBuilder {
+public class HttpResponseBuilder implements main.java.server.ResponseBuilder {
     private ByteArrayOutputStream response;
     private Response responseMap;
     private String statusLine;

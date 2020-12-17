@@ -1,10 +1,10 @@
-package server;
+package main.java.server;
 
 import java.io.IOException;
 
 public interface Responder {
 
-    Response respond(Request requestMap) throws IOException, ExceptionInfo;
+    Response respond(Request request) throws IOException, ExceptionInfo;
 
     void setHeader(String type) throws IOException, ExceptionInfo;
 

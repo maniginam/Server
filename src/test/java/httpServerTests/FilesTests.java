@@ -1,14 +1,12 @@
-package httpServerTests;
+package test.java.httpServerTests;
 
-import httpServer.*;
+import main.java.httpServer.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.Connection;
-import server.ExceptionInfo;
-import server.Router;
-import server.SocketHost;
+import main.java.server.*;
+
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FilesTests {
 
-    private TestHelper helper;
+    private HttpTestHelper helper;
     private TestConnectionFactory connectionFactory;
     private Router router;
     private SocketHost host;
@@ -31,12 +29,11 @@ public class FilesTests {
 
     @BeforeEach
     public void setup() throws IOException {
-        helper = new TestHelper(1003);
+        helper = new HttpTestHelper(1003);
         connectionFactory = new TestConnectionFactory(1003, helper.root);
         router = new Router();
         Server.registerResponders(router, helper.root);
         host = new SocketHost(1003, connectionFactory, router);
-        parser = new RequestParser();
     }
 
     @AfterEach
@@ -58,6 +55,7 @@ public class FilesTests {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("");
+        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
@@ -68,7 +66,9 @@ public class FilesTests {
         byte[] responseBody = builder.getBody();
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
-        assertTrue(router.getResponder() instanceof ListingResponder);
+        if (router.getResponder() instanceof ListingResponder)
+            assertTrue(router.getResponder() instanceof ListingResponder);
+        else System.out.println("NOT LISTING RESPONDER");
         assertArrayEquals(target.toByteArray(), result);
         Assertions.assertEquals("HTTP/1.1 200 OK\r\n", helper.getResponseStatus());
         Assertions.assertEquals("Server: Gina's Http Server\r\n" +
@@ -88,6 +88,7 @@ public class FilesTests {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/img");
+        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
@@ -117,6 +118,7 @@ public class FilesTests {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/img/BruslyDog.jpeg");
+        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
@@ -144,6 +146,7 @@ public class FilesTests {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/img/autobot.jpg");
+        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
@@ -171,6 +174,7 @@ public class FilesTests {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/img/decepticon.png");
+        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
@@ -198,6 +202,7 @@ public class FilesTests {
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/hello.pdf");
+        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();

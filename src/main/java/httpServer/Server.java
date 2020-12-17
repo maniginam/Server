@@ -1,8 +1,6 @@
-package httpServer;
+package main.java.httpServer;
 
-import server.ExceptionInfo;
-import server.Router;
-import server.SocketHost;
+import main.java.server.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,13 +37,14 @@ public class Server {
         SocketHost host = new SocketHost(port, connectionFactory, router);
         registerResponders(router, root);
         host.start();
-        host.getConnectorThread().join();
+        host.join();
     }
 
     public static void registerResponders(Router router, String root) {
         ExceptionInfo.serverName = serverName;
         router.registerResponder("GET", "([\\/\\w\\.])+(.html)$", new FileResponder(serverName, root));
         router.registerResponder("GET", "([/listing])+([/img]*)$", new ListingResponder(serverName, root));
+//        router.registerResponder("GET", "([\\/\\w])+([\\/\\w])*$", new ListingResponder(serverName, root));
         router.registerResponder("GET", "([\\/*\\w\\.])+(jpeg)$", new ImageResponder(serverName, root));
         router.registerResponder("GET", "([\\/*\\w\\.])+(jpg)$", new ImageResponder(serverName, root));
         router.registerResponder("GET", "([\\/*\\w\\.])+(png)$", new ImageResponder(serverName, root));

@@ -1,11 +1,9 @@
-package serverTests;
+package test.java.serverTests;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.Connection;
-import server.Router;
-import server.SocketHost;
+import main.java.server.*;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -42,7 +40,7 @@ public class SocketHostTest {
 
     @Test
     public void checkPort() {
-        assertEquals(3141, host.getPort());
+        assertEquals(3141, host.port);
     }
 
     @Test
@@ -78,11 +76,11 @@ public class SocketHostTest {
     @Test
     public void cleanClose() throws Exception {
         host.start();
-        assertTrue(host.getConnectorThread().isAlive());
+        assertTrue(host.isAlive());
         connect();
         Thread.sleep(100);
         host.stop();
-        assertFalse(host.getConnectorThread().isAlive());
+        assertFalse(host.isAlive());
         List<Connection> connections = host.getConnections();
         for (Connection connection : connections) {
             assertFalse(connection.getThread().isAlive());
