@@ -1,8 +1,0 @@
--------------------------------------------------------------------------------
-Test set: httpServerTests.MultiPartTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.001 s <<< FAILURE! - in httpServerTests.MultiPartTest
-submitsPOSTMultipartRequest  Time elapsed: 0.001 s  <<< ERROR!
-java.lang.NullPointerException: Cannot read the array length because "<local7>" is null
-	at httpServerTests.MultiPartTest.submitsPOSTMultipartRequest(MultiPartTest.java:54)
-
