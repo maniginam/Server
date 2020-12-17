@@ -47,8 +47,8 @@ public class MultiPartTest {
         String multipart1 = "Content-Disposition: form-data; name=\"file\"; filename=\"BruslyDog.jpeg\r\n" +
                 "Content-Type: image/jpeg\r\n\r\n";
         int contentLength = ("--" + boundary
-                + multipart1 + "\r\n--"
-                + boundary + "--").getBytes().length
+                + multipart1 + "\r\n"
+                + "--" + boundary + "--").getBytes().length
                 + helper.getContentLength() + 4;
         String requestHeader = "POST /form HTTP/1.1\r\n" +
                 "Content-Length: " + contentLength + "\r\n" +

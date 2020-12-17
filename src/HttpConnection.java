@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 
 public class HttpConnection implements Connection {
@@ -65,17 +66,10 @@ public class HttpConnection implements Connection {
                                     for (String key : partRequest.keySet()) {
                                         request.put(key, partRequest.get(key));
                                     }
-                                } else {
-                                    int currentSize = parser.getPartHeaderSize() + requestBodyBytes.size();
-                                    while(currentSize < contentLength) {
-                                        requestBodyBytes.write(buffedInput.read());
-                                    }
-                                    doneParsing = true;
-                                    request.put("body", requestBodyBytes.toByteArray());
                                 }
                                 doneParsing = getParser().doneParsing();
                             }
-                            doneParsing = true;
+
                         }
 
                         responseMap = router.route(request);

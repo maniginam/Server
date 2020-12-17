@@ -21,7 +21,6 @@ public class MultiPartResponder implements Responder {
     public Response respond(Request request) throws IOException, ExceptionInfo {
         this.request = request;
         type = "application/octet-stream";
-        System.out.println("MULTIPARTRESPONDER request = " + request);
         setBody();
         setHeader(type);
         setResponse(200);
