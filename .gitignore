@@ -1,8 +1,7 @@
 # Default ignored files
 /shelf/
 *.iml
-*.xml
-*pom.
+.idea
 target
 out
 
