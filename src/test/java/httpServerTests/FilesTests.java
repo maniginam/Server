@@ -8,10 +8,7 @@ import org.junit.jupiter.api.Test;
 import main.java.server.*;
 
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,19 +18,18 @@ public class FilesTests {
     private TestConnectionFactory connectionFactory;
     private Router router;
     private SocketHost host;
-    private RequestParser parser;
     private OutputStream output;
     private BufferedInputStream buffed;
-    private Connection connection;
     private HttpResponseBuilder builder;
 
     @BeforeEach
     public void setup() throws IOException {
         helper = new HttpTestHelper(1003);
-        connectionFactory = new TestConnectionFactory(1003, helper.root);
         router = new Router();
         Server.registerResponders(router, helper.root);
-        host = new SocketHost(1003, connectionFactory, router);
+        builder = new HttpResponseBuilder();
+        connectionFactory = new TestConnectionFactory(router, builder);
+        host = new SocketHost(1003, connectionFactory);
     }
 
     @AfterEach
@@ -43,25 +39,18 @@ public class FilesTests {
             helper.getSocket().close();
     }
 
-    private HttpResponseBuilder getConnectionBuilder(Connection connection) {
-        return connection.getResponseBuilder();
-    }
-
     @Test
-    public void listsAllFilesInListing() throws IOException, ExceptionInfo {
+    public void listsAllFilesInListing() throws IOException {
         String request = "GET /listing HTTP/1.1\r\n\r\n";
         host.start();
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("");
-        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
 
-        connection = host.getConnections().get(0);
-        builder = helper.getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         byte[] responseBody = builder.getBody();
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
@@ -81,20 +70,17 @@ public class FilesTests {
     }
 
     @Test
-    public void listsAllImgsInListingImg() throws IOException, ExceptionInfo {
+    public void listsAllImgsInListingImg() throws IOException {
         String request = "GET /listing/img HTTP/1.1\r\n\r\n";
         host.start();
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/img");
-        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
 
-        connection = host.getConnections().get(0);
-        builder = helper.getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
@@ -111,114 +97,102 @@ public class FilesTests {
     }
 
     @Test
-    public void jpegRequest() throws IOException, ExceptionInfo {
+    public void jpegRequest() throws IOException {
         String request = "GET /img/BruslyDog.jpeg HTTP/1.1\r\n\r\n";
         host.start();
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/img/BruslyDog.jpeg");
-        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
 
-        connection = host.getConnections().get(0);
-        builder = helper.getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         byte[] responseBody = builder.getBody();
+        String status = builder.getStatusLine();
+        String responseHeader = builder.getHeaders();
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
-        assertTrue(router.getResponder() instanceof ImageResponder);
-        assertArrayEquals(target.toByteArray(), result);
-        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", helper.getResponseStatus());
-        Assertions.assertEquals("Server: Gina's Http Server\r\n" +
-                "Content-Length: " + helper.getContentLength() + "\r\n" +
-                "Content-Type: image/jpeg\r\n\r\n", helper.getResponseHeader());
+        assertTrue(router.getResponder() instanceof FileResponder);
+        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", status);
+        Assertions.assertEquals(helper.getResponseHeader(), responseHeader);
         Assertions.assertArrayEquals(helper.getBody(), responseBody);
+        assertArrayEquals(target.toByteArray(), result);
     }
 
     @Test
-    public void jpgRequest() throws IOException, ExceptionInfo {
+    public void jpgRequest() throws IOException {
         String request = "GET /img/autobot.jpg HTTP/1.1\r\n\r\n";
         host.start();
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/img/autobot.jpg");
-        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
 
-        connection = host.getConnections().get(0);
-        builder = helper.getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         byte[] responseBody = builder.getBody();
+        String status = builder.getStatusLine();
+        String responseHeader = builder.getHeaders();
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
-        assertTrue(router.getResponder() instanceof ImageResponder);
-        assertArrayEquals(target.toByteArray(), result);
-        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", helper.getResponseStatus());
-        Assertions.assertEquals("Server: Gina's Http Server\r\n" +
-                "Content-Length: " + helper.getContentLength() + "\r\n" +
-                "Content-Type: image/jpeg\r\n\r\n", helper.getResponseHeader());
+        assertTrue(router.getResponder() instanceof FileResponder);
+        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", status);
+        Assertions.assertEquals(helper.getResponseHeader(), responseHeader);
         Assertions.assertArrayEquals(helper.getBody(), responseBody);
+        assertArrayEquals(target.toByteArray(), result);
     }
 
     @Test
-    public void pngRequest() throws IOException, ExceptionInfo {
+    public void pngRequest() throws IOException {
         String request = "GET /img/decepticon.png HTTP/1.1\r\n\r\n";
         host.start();
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/img/decepticon.png");
-        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
 
-        connection = host.getConnections().get(0);
-        builder = helper.getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         byte[] responseBody = builder.getBody();
+        String status = builder.getStatusLine();
+        String responseHeader = builder.getHeaders();
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
-        assertTrue(router.getResponder() instanceof ImageResponder);
-        assertArrayEquals(target.toByteArray(), result);
-        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", helper.getResponseStatus());
-        Assertions.assertEquals("Server: Gina's Http Server\r\n" +
-                "Content-Length: " + helper.getContentLength() + "\r\n" +
-                "Content-Type: image/png\r\n\r\n", helper.getResponseHeader());
+        assertTrue(router.getResponder() instanceof FileResponder);
+        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", status);
+        Assertions.assertEquals(helper.getResponseHeader(), responseHeader);
         Assertions.assertArrayEquals(helper.getBody(), responseBody);
+        assertArrayEquals(target.toByteArray(), result);
     }
 
     @Test
-    public void pdfRequest() throws IOException, ExceptionInfo {
+    public void pdfRequest() throws IOException {
         String request = "GET /hello.pdf HTTP/1.1\r\n\r\n";
         host.start();
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
         helper.setResource("/hello.pdf");
-        parser = new RequestParser(buffed);
 
         output.write(request.getBytes());
         buffed.read();
 
-        connection = host.getConnections().get(0);
-        builder = helper.getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         byte[] responseBody = builder.getBody();
+        String status = builder.getStatusLine();
+        String responseHeader = builder.getHeaders();
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        assertArrayEquals(target.toByteArray(), result);
-        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", helper.getResponseStatus());
-        Assertions.assertEquals("Server: Gina's Http Server\r\n" +
-                "Content-Length: " + helper.getContentLength() + "\r\n" +
-                "Content-Type: application/pdf\r\n\r\n", helper.getResponseHeader());
+        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", status);
+        Assertions.assertEquals(helper.getResponseHeader(), responseHeader);
         Assertions.assertArrayEquals(helper.getBody(), responseBody);
+        assertArrayEquals(target.toByteArray(), result);
     }
 }

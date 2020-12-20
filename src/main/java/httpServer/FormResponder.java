@@ -1,25 +1,24 @@
 package main.java.httpServer;
 
-import main.java.server.*;
+import main.java.server.Responder;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class FormResponder implements Responder {
     private final String serverName;
-    private final Response response;
-    private Request request;
+    private final Map<String, Object> response;
+    private Map<String, Object> request;
     private Map<String, String> header;
     private byte[] body;
 
     public FormResponder(String serverName) {
         this.serverName = serverName;
-        response = new Response();
+        response = new HashMap<String, Object>();
     }
 
     @Override
-    public Response respond(Request request) throws IOException, ExceptionInfo {
+    public Map<String, Object> respond(Map<String, Object> request) {
         this.request = request;
         setBody();
         setHeader("text/html");
@@ -35,7 +34,7 @@ public class FormResponder implements Responder {
     }
 
     @Override
-    public void setHeader(String type) throws IOException, ExceptionInfo {
+    public void setHeader(String type) {
         if (body == null) {
             setBody();
         }
@@ -48,7 +47,6 @@ public class FormResponder implements Responder {
     @Override
     public void setBody() {
         String[] entries = String.valueOf(request.get("resource")).split("[?=&]");
-
         String bodyMsg = "<h2>GET Form</h2>";
         for (int i = 1; i < entries.length; i= i+2) {
             bodyMsg = bodyMsg + "<li>" +
@@ -57,4 +55,6 @@ public class FormResponder implements Responder {
         }
         body = bodyMsg.getBytes();
     }
+
+
 }

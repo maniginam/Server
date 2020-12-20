@@ -3,24 +3,26 @@ package main.java.server;
 import main.java.httpServer.ExceptionInfoResponder;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExceptionInfo extends Throwable {
     public static String serverName;
     private ExceptionInfoResponder responder;
-    private final Request request;
-    private final Response response;
+    private final Map<String, Object> request;
+    private final Map<String, Object> response;
     private String message;
 
     public ExceptionInfo(String message) throws IOException, ExceptionInfo {
         super(message);
         this.setMessage(message);
-        request = new Request();
+        request = new HashMap<String, Object>();
         request.put("message", message);
         responder = new ExceptionInfoResponder(serverName);
         response = responder.respond(request);
     }
 
-    public Response getResponse() {
+    public Map<String, Object> getResponse() {
         return response;
     }
 

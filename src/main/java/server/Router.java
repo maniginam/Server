@@ -20,7 +20,7 @@ public class Router {
         resourceRegexs = new ArrayList<>();
     }
 
-    public Response route(Request request) throws IOException, ExceptionInfo {
+    public Map<String, Object> route(Map<String, Object> request) throws IOException, ExceptionInfo, InterruptedException {
         if (request != null) {
             method = String.valueOf(request.get("method"));
             resource = String.valueOf(request.get("resource"));
@@ -36,7 +36,7 @@ public class Router {
 
             if (responderPointer != null && methods.containsKey(method)) {
                 responder = methods.get(method).get(responderPointer);
-                Response response = responder.respond(request);
+                Map<String, Object> response = responder.respond(request);
                 return response;
             } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
@@ -56,5 +56,4 @@ public class Router {
     public Responder getResponder() {
         return responder;
     }
-
 }

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Server {
-    private static String message;
+    public static String message;
     private static int port;
     private static String root;
     private static String serverName = "Gina's Http Server";
@@ -26,16 +26,17 @@ public class Server {
         } else {
             setConfigMessage(argMap);
             System.out.println(message);
-            startServer(argMap);
+            startServer();
         }
     }
 
 
-    private static void startServer(Map<String, String> args) throws IOException, InterruptedException {
+    private static void startServer() throws IOException, InterruptedException {
         Router router = new Router();
-        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(port, root, router);
-        SocketHost host = new SocketHost(port, connectionFactory, router);
         registerResponders(router, root);
+        HttpResponseBuilder builder = new HttpResponseBuilder();
+        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(router, builder);
+        SocketHost host = new SocketHost(port, connectionFactory);
         host.start();
         host.join();
     }
@@ -45,9 +46,9 @@ public class Server {
         router.registerResponder("GET", "([\\/\\w\\.])+(.html)$", new FileResponder(serverName, root));
         router.registerResponder("GET", "([/listing])+([/img]*)$", new ListingResponder(serverName, root));
 //        router.registerResponder("GET", "([\\/\\w])+([\\/\\w])*$", new ListingResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(jpeg)$", new ImageResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(jpg)$", new ImageResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(png)$", new ImageResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(jpeg)$", new FileResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(jpg)$", new FileResponder(serverName, root));
+        router.registerResponder("GET", "([\\/*\\w\\.])+(png)$", new FileResponder(serverName, root));
         router.registerResponder("GET", "([\\/\\w\\.])+(.pdf)$", new FileResponder(serverName, root));
         router.registerResponder("GET", "([/ping\\/*])+(\\d*)", new PingResponder(serverName));
         router.registerResponder("GET", "([/form\\?])(.*=.*)(&.*=.*)*", new FormResponder(serverName));
@@ -122,10 +123,6 @@ public class Server {
             args.put("-p", String.valueOf(port));
             return 80;
         }
-    }
-
-    public String getMessage() {
-        return message;
     }
 
 }

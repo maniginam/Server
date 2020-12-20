@@ -2,10 +2,12 @@ package test.java.httpServerTests;
 
 import main.java.httpServer.RequestParser;
 import main.java.server.ExceptionInfo;
-import main.java.server.Request;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RequestParserTest {
-    private RequestParser parser;
-
 
     @Test
     public void parseBlankTargetRequest() throws IOException, ExceptionInfo {
@@ -24,7 +24,15 @@ public class RequestParserTest {
         target.put("resource", "/index.html");
         target.put("httpVersion", "HTTP/1.1");
 
-        Request result = parser.parse();
+        PipedInputStream inputPipe = new PipedInputStream();
+        PipedOutputStream outputPipe = new PipedOutputStream();
+
+        inputPipe.connect(outputPipe);
+        outputPipe.write(request.getBytes());
+        BufferedInputStream buffedInput = new BufferedInputStream(inputPipe);
+
+        RequestParser parser = new RequestParser(buffedInput);
+        Map<String, Object> result = parser.parse();
 
         assertEquals(target, result);
         assertEquals("GET", result.get("method"));
@@ -40,7 +48,15 @@ public class RequestParserTest {
         target.put("resource", "/index.html");
         target.put("httpVersion", "HTTP/1.1");
 
-        Request result = parser.parse();
+        PipedInputStream inputPipe = new PipedInputStream();
+        PipedOutputStream outputPipe = new PipedOutputStream();
+
+        inputPipe.connect(outputPipe);
+        outputPipe.write(request.getBytes());
+        BufferedInputStream buffedInput = new BufferedInputStream(inputPipe);
+
+        RequestParser parser = new RequestParser(buffedInput);
+        Map<String, Object> result = parser.parse();
         assertEquals(target, result);
     }
 
@@ -52,7 +68,15 @@ public class RequestParserTest {
         target.put("resource", "/index.html");
         target.put("httpVersion", "HTTP/1.1");
 
-        Request result = parser.parse();
+        PipedInputStream inputPipe = new PipedInputStream();
+        PipedOutputStream outputPipe = new PipedOutputStream();
+
+        inputPipe.connect(outputPipe);
+        outputPipe.write(request.getBytes());
+        BufferedInputStream buffedInput = new BufferedInputStream(inputPipe);
+
+        RequestParser parser = new RequestParser(buffedInput);
+        Map<String, Object> result = parser.parse();
         assertEquals(target, result);
     }
 
@@ -60,6 +84,14 @@ public class RequestParserTest {
     public void garbageMethod() throws IOException, ExceptionInfo {
         String request = "Rex /index.html HTTP/1.1\r\n\r\n";
 
+        PipedInputStream inputPipe = new PipedInputStream();
+        PipedOutputStream outputPipe = new PipedOutputStream();
+
+        inputPipe.connect(outputPipe);
+        outputPipe.write(request.getBytes());
+        BufferedInputStream buffedInput = new BufferedInputStream(inputPipe);
+
+        RequestParser parser = new RequestParser(buffedInput);
         assertThrows(ExceptionInfo.class, () -> {
             parser.parse();
         });

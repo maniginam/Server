@@ -1,15 +1,15 @@
 package main.java.httpServer;
 
-import main.java.server.Response;
+import main.java.server.ResponseBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-public class HttpResponseBuilder implements main.java.server.ResponseBuilder {
+public class HttpResponseBuilder implements ResponseBuilder {
     private ByteArrayOutputStream response;
-    private Response responseMap;
+    private Map<String, Object> responseMap;
     private String statusLine;
     private String headers;
     private byte[] body;
@@ -18,7 +18,8 @@ public class HttpResponseBuilder implements main.java.server.ResponseBuilder {
         response = new ByteArrayOutputStream();
     }
 
-    public byte[] buildResponse(Response responseMap) throws IOException {
+    @Override
+    public byte[] buildResponse(Map<String, Object> responseMap) throws IOException {
         this.responseMap = responseMap;
         writeStatusLIne();
         writeHeaders();

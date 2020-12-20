@@ -10,18 +10,18 @@ import java.util.Map;
 
 public class PingResponder implements Responder {
     private final String serverName;
-    private final Response response;
-    private Request request;
+    private final Map<String, Object> response;
+    private Map<String, Object> request;
     private byte[] body;
     private Map<String, String> header;
 
     public PingResponder(String serverName) {
         this.serverName = serverName;
-        response = new Response();
+        response = new HashMap<>();
     }
 
     @Override
-    public Response respond(Request request) throws IOException, ExceptionInfo {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo, InterruptedException {
         this.request = request;
         setBody();
         setHeader("text/html");
@@ -37,7 +37,7 @@ public class PingResponder implements Responder {
     }
 
     @Override
-    public void setHeader(String type) throws IOException, ExceptionInfo {
+    public void setHeader(String type) throws IOException, ExceptionInfo, InterruptedException {
         if (body == null) {
             setBody();
         }
@@ -48,17 +48,20 @@ public class PingResponder implements Responder {
     }
 
     @Override
-    public void setBody() throws IOException, ExceptionInfo {
+    public void setBody() throws InterruptedException {
         int wait = getWait();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String now = formatter.format(new Date());
-        String later = formatter.format(new Date(System.currentTimeMillis() + wait * 1000));
+        Date now = new Date();
+        Thread.sleep(wait * 1000);
+        Date later = new Date();
+        int sleep = Math.decrementExact((int)later.getTime() - (int)now.getTime()) / 1000;
+        System.out.println("sleep = " + sleep);
 
         body = ("<html>\r\n" +
                 "<h2>Ping</h2>\r\n" +
-                "<li>start time: " + now + "</li>\r\n" +
-                "<li>end time: " + later + "</li>\r\n" +
-                "<li>sleep seconds: " + wait + "</li>\r\n" +
+                "<li>start time: " + formatter.format(now) + "</li>\r\n" +
+                "<li>end time: " + formatter.format(later) + "</li>\r\n" +
+                "<li>sleep seconds: " + sleep + "</li>\r\n" +
                 "</html>\r\n" +
                 "\r\n").getBytes();
     }
@@ -69,4 +72,5 @@ public class PingResponder implements Responder {
             return Integer.parseInt(pingArgs[2]);
         else return 0;
     }
+
 }

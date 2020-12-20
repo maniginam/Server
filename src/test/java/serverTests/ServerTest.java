@@ -13,14 +13,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerTest {
-
-    private Server server;
     private TestHelper helper;
 
     @BeforeEach
     public void setup() throws IOException, InterruptedException {
         helper = new TestHelper(1003);
-        server = new Server();
     }
 
     @Test
@@ -28,8 +25,8 @@ public class ServerTest {
         String message = "Invalid option: Rex";
         Map<String, String> args = new HashMap<>();
         args.put("Rex", null);
-        server.setConfigMessage(args);
-        String result = server.getMessage();
+        Server.setConfigMessage(args);
+        String result = Server.message;
         assertEquals(message, result);
     }
 
@@ -41,8 +38,8 @@ public class ServerTest {
         String x = "  -x     Print the startup configuration without starting the server";
         String message = p + r + h + x;
 
-        server.setUsage();
-        String result = server.getMessage();
+        Server.setUsage();
+        String result = Server.message;
 
         assertEquals(message, result);
     }
@@ -56,8 +53,8 @@ public class ServerTest {
         Map<String, String> args = new HashMap<>();
         args.put("-x", null);
 
-        server.setConfigMessage(args);
-        String result = server.getMessage();
+        Server.setConfigMessage(args);
+        String result = Server.message;
 
         assertEquals(message, result);
     }
@@ -72,8 +69,8 @@ public class ServerTest {
         args.put("-x", null);
         args.put("-p", "3141");
 
-        server.setConfigMessage(args);
-        String result = server.getMessage();
+        Server.setConfigMessage(args);
+        String result = Server.message;
 
         assertEquals(message, result);
 
@@ -90,8 +87,8 @@ public class ServerTest {
         args.put("-x", null);
         args.put("-r", "testroot");
 
-        server.setConfigMessage(args);
-        String result = server.getMessage();
+        Server.setConfigMessage(args);
+        String result = Server.message;
 
         assertEquals(message, result);
     }
@@ -105,17 +102,17 @@ public class ServerTest {
         Map<String, String> args = new HashMap<>();
         args.put("-p", "3141");
 
-        server.setConfigMessage(args);
-        String result = server.getMessage();
+        Server.setConfigMessage(args);
+        String result = Server.message;
 
         assertEquals(message, result);
     }
 
     @Test
-    public void registersFileResponder() throws IOException, ExceptionInfo {
+    public void registersFileResponder() throws IOException, ExceptionInfo, InterruptedException {
         Router router = new Router();
-        server.registerResponders(router, helper.root);
-        Request request = new Request();
+        Server.registerResponders(router, helper.root);
+        Map<String, Object> request = new HashMap<String, Object>();
         request.put("method", "GET");
         request.put("resource", "/index.html");
 

@@ -7,19 +7,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ExceptionInfoResponder implements Responder {
-    Response response;
+    Map<String, Object> response;
     Map<String, String> header;
     private byte[] body;
     private boolean bodyIsSet;
     private String serverName;
-    private Request request;
+    private Map<String, Object> request;
 
     public ExceptionInfoResponder(String serverName) {
         this.serverName = serverName;
-        response = new Response();
+        response = new HashMap<>();
     }
 
-    public Response respond(Request request) throws IOException, ExceptionInfo {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo {
         this.request = request;
         setBody();
         setHeader("text/html");

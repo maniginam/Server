@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class MultiPartResponder implements Responder {
     private final String serverName;
-    private final Response response;
-    private Request request;
+    private final Map<String, Object> response;
+    private Map<String, Object> request;
     private Map<String, String> header;
     private byte[] body;
     private String fileName;
@@ -17,11 +17,11 @@ public class MultiPartResponder implements Responder {
 
     public MultiPartResponder(String serverName) {
         this.serverName = serverName;
-        response = new Response();
+        response = new HashMap<String, Object>();
     }
 
     @Override
-    public Response respond(Request request) throws IOException, ExceptionInfo {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo {
         this.request = request;
         type = "application/octet-stream";
         setBody();
@@ -38,7 +38,7 @@ public class MultiPartResponder implements Responder {
     }
 
     @Override
-    public void setHeader(String type) throws IOException, ExceptionInfo {
+    public void setHeader(String type) throws IOException {
         if (body == null) {
             setBody();
         }
@@ -56,4 +56,5 @@ public class MultiPartResponder implements Responder {
                 "<li>content type: " + type + "</li>";
         body = bodyMsg.getBytes();
     }
+
 }

@@ -10,16 +10,14 @@ import java.util.List;
 public class SocketHost {
     private final ConnectionFactory connectionFactory;
     public final int port;
-    private final Router router;
     private ServerSocket server;
     private boolean running = false;
     private Thread connectorThread;
     private final List<Connection> connections = new LinkedList<>();
 
-    public SocketHost(int port, ConnectionFactory connectionFactory, Router router) {
+    public SocketHost(int port, ConnectionFactory connectionFactory) {
         this.port = port;
         this.connectionFactory = connectionFactory;
-        this.router = router;
     }
 
     public void start() throws IOException {
@@ -43,9 +41,9 @@ public class SocketHost {
         while (running) {
             try {
                 Socket socket = server.accept();
-                Connection connection = connectionFactory.createConnection(this, socket, router);
-                connection.start();
+                Connection connection = connectionFactory.createConnection(this, socket);
                 connections.add(connection);
+                connection.start();
             } catch (SocketException e) {
                 // closed socket service while waiting for connection
             }

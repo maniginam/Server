@@ -6,19 +6,18 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class HttpConnectionFactory implements ConnectionFactory {
-    private final String path;
-    private final int port;
-    private Socket socket;
+    private final Router router;
+    private final HttpResponseBuilder builder;
     private HttpConnection connection;
 
-    public HttpConnectionFactory(int port, String path, Router router) {
-        this.port = port;
-        this.path = path;
+    public HttpConnectionFactory(Router router, HttpResponseBuilder builder) {
+        this.router = router;
+        this.builder = builder;
     }
 
     @Override
-    public Connection createConnection(SocketHost host, Socket socket, Router router) throws IOException {
-        connection = new HttpConnection(host, socket, router);
+    public Connection createConnection(SocketHost host, Socket socket) throws IOException {
+        connection = new HttpConnection(host, socket, router, builder);
         return connection;
     }
 

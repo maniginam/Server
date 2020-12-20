@@ -1,6 +1,7 @@
 package main.java.httpServer;
 
-import main.java.server.*;
+import main.java.server.ExceptionInfo;
+import main.java.server.Responder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,26 +13,38 @@ import java.util.Map;
 public class FileResponder implements Responder {
     private final String root;
     private final String serverName;
-    Response response;
+    private final HashMap<String, String> types;
+    HashMap<String, Object> response;
     Map<String, String> header;
     private byte[] body;
-    public Request request;
+    public Map<String, Object> request;
 
     public FileResponder(String serverName, String root) {
         this.root = root;
         this.serverName = serverName;
-        response = new Response();
+        response = new HashMap<String, Object>();
+        types = new HashMap<>();
+        types.put("html", "text/html");
+        types.put("pdf", "application/pdf");
+        types.put("jpg", "image/jpeg");
+        types.put("jpeg", "image/jpeg");
+        types.put("png", "image/png");
     }
 
-    public Response respond(Request request) throws IOException, ExceptionInfo {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo {
         this.request = request;
         setBody();
-        String type = "text/html";
-        if (String.valueOf(request.get("resource")).contains(".pdf"))
-            type = "application/pdf";
+        String type;
+        type = determineFileType();
         setHeader(type);
         setResponse(200);
         return response;
+    }
+
+    private String determineFileType() {
+        String resource = String.valueOf(request.get("resource"));
+        String fileType = resource.split("\\.")[resource.split("\\.").length - 1];
+        return types.get(fileType);
     }
 
     @Override
@@ -60,6 +73,4 @@ public class FileResponder implements Responder {
         header.put("Content-Type", type);
         header.put("Content-Length", String.valueOf(body.length));
     }
-
-
 }

@@ -24,6 +24,7 @@ public class HttpTestHelper {
     private byte[] body;
     private int contentLength;
     private HttpResponseBuilder builder;
+    private String type;
 
     public HttpTestHelper(int port) throws IOException {
         this.port = port;
@@ -33,7 +34,14 @@ public class HttpTestHelper {
         String fileRoot = root + resource;
         path = Paths.get(fileRoot);
         File file = new File(fileRoot);
+        type = "text/html";
         if (file.isFile()) {
+            type = resource.split("\\.")[resource.split("\\.").length - 1];
+            if (type.contains("pdf"))
+                type = "application/pdf";
+            else if (type.contains("jpg"))
+                type = "image/jpeg";
+            else type = "image/" + type;
             body = Files.readAllBytes(path);
             contentLength = body.length;
         } else {
@@ -99,41 +107,52 @@ public class HttpTestHelper {
         return bodyLines;
     }
 
-    public HttpResponseBuilder getConnectionBuilder(Connection connection) {
-        builder = connection.getResponseBuilder();
-        return connection.getResponseBuilder();
-    }
-
     public ByteArrayOutputStream getFullTargetOutputArray() throws IOException {
+        builder = new HttpResponseBuilder();
         ByteArrayOutputStream target = new ByteArrayOutputStream();
-        target.write((getResponseStatus() + getResponseHeader()).getBytes());
-        target.write(builder.getBody());
+        target.write(getResponseStatus().getBytes());
+        target.write(getResponseHeader().getBytes());
+        target.write(body);
         return target;
     }
 
     String getResponseStatus() {
-        return builder.getStatusLine();
+        return "HTTP/1.1 200 OK\r\n";
     }
 
     String getResponseHeader() {
-        return builder.getHeaders();
+        return "Server: Gina's Http Server\r\n" +
+                "Content-Length: " + body.length + "\r\n" +
+                "Content-Type: " + type + "\r\n\r\n";
+    }
+
+    public RequestParser getParser(String request) throws IOException {
+        PipedInputStream inputPipe = new PipedInputStream();
+        PipedOutputStream outputPipe = new PipedOutputStream();
+
+        inputPipe.connect(outputPipe);
+        outputPipe.write(request.getBytes());
+        BufferedInputStream buffedInput = new BufferedInputStream(inputPipe);
+
+        return new RequestParser(buffedInput);
     }
 }
 
 class TestConnectionFactory implements ConnectionFactory {
-    private final int port;
-    private final String path;
-    private TestConnection connection;
 
-    public TestConnectionFactory(int port, String path) {
-        this.port = port;
-        this.path = path;
+    private final Router router;
+    private TestConnection connection;
+    private HttpResponseBuilder builder;
+
+    public TestConnectionFactory(Router router, HttpResponseBuilder builder) {
+        this.router = router;
+        this.builder = builder;
 
     }
 
     @Override
-    public TestConnection createConnection(SocketHost host, Socket socket, Router router) throws IOException {
-        connection = new TestConnection(host, socket, router);
+    public TestConnection createConnection(SocketHost host, Socket socket) throws IOException {
+        connection = new TestConnection(host, socket, router, builder);
         return connection;
     }
 
@@ -146,8 +165,8 @@ class TestConnectionFactory implements ConnectionFactory {
 
 class TestConnection extends HttpConnection {
 
-    public TestConnection(SocketHost host, Socket socket, Router router) throws IOException {
-        super(host, socket, router);
+    public TestConnection(SocketHost host, Socket socket, Router router, HttpResponseBuilder builder) throws IOException {
+        super(host, socket, router, builder);
     }
 }
 

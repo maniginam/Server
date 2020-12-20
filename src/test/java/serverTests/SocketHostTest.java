@@ -1,14 +1,16 @@
 package test.java.serverTests;
 
+import main.java.server.Connection;
+import main.java.server.ResponseBuilder;
+import main.java.server.Router;
+import main.java.server.SocketHost;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import main.java.server.*;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
-
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,9 +24,10 @@ public class SocketHostTest {
     @BeforeEach
     public void setup() throws IOException {
         helper = new TestHelper(1003);
-        connectionFactory = new TestConnectionFactory(3141, helper.root);
         router = new Router();
-        host = new SocketHost(3141, connectionFactory, router);
+        ResponseBuilder builder = new TestResponseBuilder();
+        connectionFactory = new TestConnectionFactory(router, builder);
+        host = new SocketHost(3141, connectionFactory);
     }
 
     private void connect() throws IOException {

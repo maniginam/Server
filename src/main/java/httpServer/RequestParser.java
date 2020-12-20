@@ -1,29 +1,24 @@
 package main.java.httpServer;
 
-import main.java.server.*;
+import main.java.server.ExceptionInfo;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RequestParser {
     private final List<String> methods;
     private final BufferedInputStream inputStream;
-    Request requestMap = new Request();
+    Map<String, Object> requestMap;
     private boolean isHeaderComplete;
     private int contentLength;
-    private boolean isRequestComplete;
-    private String boundary;
-    private boolean statusLineSet;
-    private boolean isMultiPartRequest;
-    private boolean doneParsing;
-    private int remainingBytes;
-    private boolean partHeaderDone;
-    private int partHeaderSize;
-    private int headerSize;
+    private String header;
+    private String multiPartHeader;
 
     public RequestParser(BufferedInputStream inputStream) {
         this.inputStream = inputStream;
@@ -31,136 +26,127 @@ public class RequestParser {
         methods.add("GET");
         methods.add("POST");
         isHeaderComplete = false;
-        isRequestComplete = false;
-        statusLineSet = false;
-        isMultiPartRequest = false;
-        doneParsing = false;
-        requestMap = new Request();
+        requestMap = new HashMap<String, Object>();
     }
 
-    public Request parse() throws IOException, ExceptionInfo {
+    public Map<String, Object> parse() throws IOException, ExceptionInfo {
         extractHeader();
+        splitHeadersToMap(header);
+        setContentLength();
+        if (isRequestMultiPart())
+            parseMultiPart();
         return requestMap;
     }
 
-
-    private void extractHeader() throws IOException, ExceptionInfo {
+    private void extractHeader() throws IOException {
         ByteArrayOutputStream headerOutput = new ByteArrayOutputStream();
         while (!isHeaderComplete) {
             headerOutput.write(inputStream.read());
-            String header = new String(headerOutput.toByteArray(), StandardCharsets.UTF_8);
+            header = new String(headerOutput.toByteArray(), StandardCharsets.UTF_8);
             if (header.endsWith("\r\n\r\n")) {
                 isHeaderComplete = true;
-                headerSize = header.length();
-                String[] headers = header.split("\r\n");
-                for (String line : headers) {
-                    splitHeaders(line);
-                }
-                if (requestMap.containsKey("Content-Length"))
-                    contentLength = Integer.parseInt(String.valueOf(requestMap.get("Content-Length")));
-                if (contentLength > 0) {
-                    isMultiPartRequest = true;
-                } else {
-                    doneParsing = true;
-                }
             }
         }
     }
 
-    public Request parseMultiPart(byte[] multiPartBytes) throws IOException, ExceptionInfo {
-        String header = "";
-        ByteArrayOutputStream headerBytes = new ByteArrayOutputStream();
-        for (int i = 0; i < multiPartBytes.length; i++) {
-            headerBytes.write(multiPartBytes[i]);
-            header = new String(headerBytes.toByteArray(), StandardCharsets.UTF_8);
-            if (header.contains("\r\n\r\n")) {
-                break;
+    private void splitHeadersToMap(String header) throws IOException, ExceptionInfo {
+        String[] headerLines = header.split("\r\n");
+        for (String line : headerLines) {
+            if (line.contains("HTTP/1.1")) {
+                splitStartLine(line);
+            } else if (line.split(": ").length > 1) {
+                String[] entity = line.split(": ");
+                if (line.contains("Content-Type")) {
+                    if (entity[1].contains("boundary=")) {
+                        String[] contentType = entity[1].split("; boundary=");
+                        requestMap.put("boundary", contentType[1]);
+                    }
+                } else if (line.contains("Content-Disposition")) {
+                    String name = line.split("; ")[2].split("=")[1];
+                    requestMap.put("fileName", name);
+                } else requestMap.put(entity[0], entity[1]);
             }
         }
-            partHeaderSize = header.length();
-            int fileSize = multiPartBytes.length - header.length() - ("\r\n--" + requestMap.get("boundary") + "--\r\n").length() ;
+    }
+
+        private void splitStartLine(String startLine) throws IOException, ExceptionInfo {
+            String[] startLineParts = startLine.split(" ");
+            String method = startLineParts[0];
+            if (startLineParts[startLineParts.length - 1].matches("HTTP/1.1")) {
+                requestMap.put("httpVersion", "HTTP/1.1");
+                requestMap.put("method", extractMethod(method));
+                requestMap.put("resource", extractResource(startLineParts));
+            } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
+        }
+
+            private String extractMethod(String method) throws ExceptionInfo, IOException {
+                if (methods.contains(method))
+                    return method;
+                else {
+                    throw new ExceptionInfo("The page you are looking for is 93 million miles away!  And the method " + method + " you requested is not valid!");
+                }
+            }
+
+            private String extractResource(String[] startLine) throws ExceptionInfo, IOException {
+                String resource = "/index.html";
+                if (startLine.length == 3) {
+                    if (!startLine[1].matches("/"))
+                        resource = startLine[1];
+                } else if (startLine.length != 2)
+                    throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
+                return resource;
+            }
+
+    private void setContentLength() {
+        if (requestMap.containsKey("Content-Length"))
+            contentLength = Integer.parseInt(String.valueOf(requestMap.get("Content-Length")));
+        else contentLength = 0;
+    }
+
+    private boolean isRequestMultiPart() {
+        return contentLength > 0;
+    }
+
+    public void parseMultiPart() throws IOException, ExceptionInfo {
+        byte[] multiPartBytes = readRestOfInputStream();
+        multiPartHeader = extractMultiPartHeader(multiPartBytes);
+        splitHeadersToMap(multiPartHeader);
+        parseRequestBody(multiPartBytes);
+    }
+
+        private byte[] readRestOfInputStream() throws IOException {
+            byte[] body = new byte[contentLength];
+            for (int i = 0; i < contentLength; i++) {
+                body[i] = (byte) inputStream.read();
+            }
+            return body;
+        }
+
+        private String extractMultiPartHeader(byte[] multiPartBytes) {
+            String multiPartHeader = "";
+            ByteArrayOutputStream multiPartHeaderBytes = new ByteArrayOutputStream();
+            for (byte multiPartByte : multiPartBytes) {
+                multiPartHeaderBytes.write(multiPartByte);
+                multiPartHeader = new String(multiPartHeaderBytes.toByteArray(), StandardCharsets.UTF_8);
+                if (multiPartHeader.contains("\r\n\r\n")) {
+                    break;
+                }
+            }
+            return multiPartHeader;
+        }
+
+        public void parseRequestBody(byte[] multiPartBytes) {
+            int fileSize = determineFileSize(multiPartBytes);
+            byte[] body = new byte[fileSize];
+            int headerSize = multiPartBytes.length - fileSize;
+            System.arraycopy(multiPartBytes, headerSize, body, 0, fileSize);
             requestMap.put("fileSize", fileSize);
-            partHeaderDone = true;
-            doneParsing = true;
-            String[] headers = header.split("\r\n");
-            for (String line : headers)
-                splitHeaders(line);
-        return requestMap;
-    }
-
-    private void splitHeaders(String line) throws IOException, ExceptionInfo {
-        if (line.contains("HTTP/1.1")) {
-            splitStartLine(line);
-        } else if (line.split(": ").length > 1) {
-            String[] entity = line.split(": ");
-            if (line.contains("Content-Type")) {
-                if (entity[1].contains("boundary=")) {
-                    String[] contentType = entity[1].split("; boundary=");
-                    requestMap.put("boundary", contentType[1]);
-                }
-            } else if (line.contains("Content-Disposition")) {
-                String name = line.split("; ")[2].split("=")[1];
-                requestMap.put("fileName", name);
-            } else requestMap.put(entity[0], entity[1]);
+            requestMap.put("body", body);
         }
-    }
 
-
-    private void splitStartLine(String startLine) throws IOException, ExceptionInfo {
-        String[] startLineParts = startLine.split(" ");
-        String method = startLineParts[0];
-        if (startLineParts[startLineParts.length - 1].matches("HTTP/1.1")) {
-            requestMap.put("httpVersion", "HTTP/1.1");
-            requestMap.put("method", extractMethod(method));
-            requestMap.put("resource", extractResource(startLineParts));
-        } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
-    }
-
-    private String extractMethod(String method) throws ExceptionInfo, IOException {
-        if (methods.contains(method))
-            return method;
-        else {
-            throw new ExceptionInfo("The page you are looking for is 93 million miles away!  And the method " + method + " you requested is not valid!");
-        }
-    }
-
-    private String extractResource(String[] startLine) throws ExceptionInfo, IOException {
-        String resource = "/index.html";
-        if (startLine.length == 3) {
-            if (!startLine[1].matches("/"))
-                resource = startLine[1];
-        } else if (startLine.length != 2)
-            throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
-        return resource;
-    }
-
-    public boolean isHeaderComplete() {
-        return isHeaderComplete;
-    }
-
-    public boolean isRequestComplete() {
-        return isRequestComplete;
-    }
-
-    public boolean getIsMultiPartRequest() {
-        return isMultiPartRequest;
-    }
-
-    public boolean doneParsing() {
-        return doneParsing;
-    }
-
-    public Request addBody(byte[] body) {
-        requestMap.put("body", body);
-        doneParsing = true;
-        return requestMap;
-    }
-
-    public boolean getPartHeaderDone() {
-        return partHeaderDone;
-    }
-
-    public int getPartHeaderSize() {
-        return partHeaderSize;
-    }
+            private int determineFileSize(byte[] multiPartBytes) {
+                return multiPartBytes.length
+                        - multiPartHeader.length()
+                        - ("\r\n--" + requestMap.get("boundary") + "--\r\n").length();
+            }
 }

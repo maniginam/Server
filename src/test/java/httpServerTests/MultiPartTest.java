@@ -15,7 +15,6 @@ public class MultiPartTest {
     private TestConnectionFactory connectionFactory;
     private Router router;
     private SocketHost host;
-    private RequestParser parser;
     private OutputStream output;
     private BufferedInputStream buffed;
     private Connection connection;
@@ -25,10 +24,11 @@ public class MultiPartTest {
     public void setup() throws IOException {
         int port = 1988;
         helper = new HttpTestHelper(port);
-        connectionFactory = new TestConnectionFactory(port, helper.root);
         router = new Router();
         Server.registerResponders(router, helper.root);
-        host = new SocketHost(port, connectionFactory, router);
+        builder = new HttpResponseBuilder();
+        connectionFactory = new TestConnectionFactory(router, builder);
+        host = new SocketHost(port, connectionFactory);
     }
 
     @AfterEach
@@ -44,7 +44,6 @@ public class MultiPartTest {
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();
-        parser = new RequestParser(buffed);
 
         helper.setResource("/img/BruslyDog.jpeg");
         String boundary = "Rex&LeoBoundary";
@@ -68,7 +67,7 @@ public class MultiPartTest {
         Thread.sleep(100);
 
         connection = host.getConnections().get(0);
-        builder = helper.getConnectionBuilder(connection);
+
 
 
         String status = builder.getStatusLine();

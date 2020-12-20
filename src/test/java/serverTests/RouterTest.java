@@ -1,11 +1,16 @@
 package test.java.serverTests;
 
-import main.java.server.*;
-import main.java.httpServer.*;
+import main.java.httpServer.FileResponder;
+import main.java.httpServer.ListingResponder;
+import main.java.server.ExceptionInfo;
+import main.java.server.Responder;
+import main.java.server.Router;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -19,10 +24,10 @@ public class RouterTest {
     }
 
     @Test
-    public void registersFileResponder() throws IOException, ExceptionInfo {
+    public void registersFileResponder() throws IOException, ExceptionInfo, InterruptedException {
         Router router = new Router();
         router.registerResponder("GET", "([\\/\\w\\.])+(.html)$", new FileResponder("Rex's http.Server", helper.root));
-        Request request = new Request();
+        Map<String, Object> request = new HashMap<String, Object>();
         request.put("method", "GET");
         request.put("resource", "/index.html");
 
@@ -33,10 +38,10 @@ public class RouterTest {
     }
 
     @Test
-    public void registersListingResponder() throws IOException, ExceptionInfo {
+    public void registersListingResponder() throws IOException, ExceptionInfo, InterruptedException {
         Router router = new Router();
         router.registerResponder("GET", "/listing", new ListingResponder("Leo's http.Server", helper.root));
-        Request request = new Request();
+        Map<String, Object> request = new HashMap<String, Object>();
         request.put("method", "GET");
         request.put("resource", "/listing");
 

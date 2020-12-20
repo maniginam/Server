@@ -1,10 +1,16 @@
 package test.java.httpServerTests;
 
-import main.java.httpServer.*;
+import main.java.httpServer.FileResponder;
+import main.java.httpServer.HttpResponseBuilder;
+import main.java.httpServer.RequestParser;
+import main.java.httpServer.Server;
+import main.java.server.Connection;
+import main.java.server.ExceptionInfo;
+import main.java.server.Router;
+import main.java.server.SocketHost;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import main.java.server.*;
 
 import java.io.*;
 import java.util.HashMap;
@@ -26,10 +32,11 @@ public class BasicRequestsTest {
     @BeforeEach
     public void setup() throws IOException {
         helper = new HttpTestHelper(1518);
-        connectionFactory = new TestConnectionFactory(1518, helper.root);
         router = new Router();
         Server.registerResponders(router, helper.root);
-        host = new SocketHost(1518, connectionFactory, router);
+        builder = new HttpResponseBuilder();
+        connectionFactory = new TestConnectionFactory(router, builder);
+        host = new SocketHost(1518, connectionFactory);
     }
 
     @AfterEach
@@ -44,10 +51,6 @@ public class BasicRequestsTest {
         InputStreamReader inputReader = new InputStreamReader(bodyStream);
         BufferedReader reader = new BufferedReader(inputReader);
         return reader.readLine();
-    }
-
-    private HttpResponseBuilder getConnectionBuilder(Connection connection) {
-        return connection.getResponseBuilder();
     }
 
     private ByteArrayOutputStream getFullTargetOutputArray() throws IOException {
@@ -79,9 +82,8 @@ public class BasicRequestsTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
-        builder = getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
-        String responseBodyMsg = readResponseBodyResult(builder.getBody());
+        String responseBodyMsg = helper.readResponseBodyResult(builder.getBody());
         ByteArrayOutputStream target = getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
@@ -90,7 +92,8 @@ public class BasicRequestsTest {
         assertEquals("Server: Gina's Http Server\r\n" +
                 "Content-Length: " + helper.getContentLength() + "\r\n" +
                 "Content-Type: text/html\r\n\r\n", getResponseHeader());
-        assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
+        assertTrue(responseBodyMsg.contains("<h1>Hello, World!</h1>"));
+        assertTrue(responseBodyMsg.contains("<p>You have reached the index.html file in testroot of the httpServer-spec project.</p>"));
     }
 
     @Test
@@ -107,7 +110,6 @@ public class BasicRequestsTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
-        builder = getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         String responseBodyMsg = readResponseBodyResult(builder.getBody());
         ByteArrayOutputStream target = getFullTargetOutputArray();
@@ -135,7 +137,6 @@ public class BasicRequestsTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
-        builder = getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         String responseBodyMsg = readResponseBodyResult(builder.getBody());
         ByteArrayOutputStream target = getFullTargetOutputArray();
@@ -163,11 +164,10 @@ public class BasicRequestsTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
-        Request requestMap = new Request();
+        Map<String, Object> requestMap = new HashMap<String, Object>();
         requestMap.put("method", "GET");
         requestMap.put("resource", "/Leo");
         requestMap.put("httpVersion", "HTTP/1.1");
-        builder = getConnectionBuilder(connection);
         byte[] result = builder.getResponse();
         String responseBodyMsg = readResponseBodyResult(builder.getBody());
         ByteArrayOutputStream target = getFullTargetOutputArray();
@@ -196,8 +196,7 @@ public class BasicRequestsTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
-        builder = getConnectionBuilder(connection);
-        Request requestMap = new Request();
+        Map<String, Object> requestMap = new HashMap<String, Object>();
         requestMap.put("method", "REX");
         requestMap.put("resource", "/index.html");
         requestMap.put("httpVersion", "HTTP/1.1");
@@ -215,46 +214,4 @@ public class BasicRequestsTest {
         assertEquals(errorMsg, responseBodyMsg);
     }
 
-    public static class ResponderTest {
-
-        private RequestParser parser;
-        private Request requestMap;
-        private Response response;
-        private Responder responder;
-        private HttpTestHelper helper;
-
-        @BeforeEach
-        public void setup() throws IOException {
-            helper = new HttpTestHelper(4321);
-            requestMap = new Request();
-            response = new Response();
-        }
-
-        @Test
-        public void responseToBlankGET () throws IOException, ExceptionInfo {
-            String request = "GET HTTP/1.1\r\n\r\n";
-            String root = helper.root;
-            requestMap = parser.parse();
-            responder = new FileResponder("Rex's Server", root);
-            response = responder.respond(requestMap);
-            helper.setResource("/index.html");
-            byte[] body = helper.getBody();
-            int contentLength = helper.getContentLength();
-
-            Map<String, String> headers = new HashMap<String, String>();
-            headers.put("Content-Length", String.valueOf(contentLength));
-            headers.put("Content-Type", "text/html");
-            headers.put("Server", "Rex's Server");
-            Map<String, Object> target = new HashMap<String, Object>();
-            target.put("statusCode", "HTTP/1.1 200 OK");
-            target.put("headers", headers);
-            target.put("body", body);
-
-            assertEquals(200, response.get("statusCode"));
-            assertEquals(headers, response.get("headers"));
-            assertArrayEquals(body, (byte[]) response.get("body"));
-        }
-
-    }
 }
-
