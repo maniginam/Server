@@ -25,7 +25,7 @@ public class FormsTest {
         int port = 1986;
         helper = new HttpTestHelper(port);
         router = new Router();
-        Server.registerResponders(router, helper.root);
+        Server.registerResponders(router, builder, helper.root);
         builder = new HttpResponseBuilder();
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(port, connectionFactory);
@@ -50,17 +50,15 @@ public class FormsTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
-
-        String status = builder.getStatusLine();
-        String header = builder.getHeaders();
-        String body = helper.readResponseBodyResult(builder.getBody());
+        byte[] result = builder.getResponse();
+        String msg = helper.readResponseBodyResult(result);
 
         assertTrue(connection.getRouter().getResponder() instanceof FormResponder);
-        assertTrue(status.contains("HTTP/1.1 200 OK"));
-        assertTrue(header.contains("Content-Type: text/html"));
-        assertTrue(body.contains("<h2>GET Form</h2>"));
-        assertTrue(body.contains("<li>rex: 3</li>"));
-        assertTrue(body.contains("<li>leo: 1</li>"));
+        assertTrue(msg.contains("HTTP/1.1 200 OK"));
+        assertTrue(msg.contains("Content-Type: text/html"));
+        assertTrue(msg.contains("<h2>GET Form</h2>"));
+        assertTrue(msg.contains("<li>rex: 3</li>"));
+        assertTrue(msg.contains("<li>leo: 1</li>"));
     }
 
 }

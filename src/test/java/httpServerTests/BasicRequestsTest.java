@@ -33,8 +33,8 @@ public class BasicRequestsTest {
     public void setup() throws IOException {
         helper = new HttpTestHelper(1518);
         router = new Router();
-        Server.registerResponders(router, helper.root);
         builder = new HttpResponseBuilder();
+        Server.registerResponders(router, builder, helper.root);
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(1518, connectionFactory);
     }
@@ -44,24 +44,6 @@ public class BasicRequestsTest {
         host.stop();
         if (helper.getSocket() != null)
             helper.getSocket().close();
-    }
-
-    private String readResponseBodyResult(byte[] body) throws IOException {
-        InputStream bodyStream = new ByteArrayInputStream(body);
-        InputStreamReader inputReader = new InputStreamReader(bodyStream);
-        BufferedReader reader = new BufferedReader(inputReader);
-        return reader.readLine();
-    }
-
-    private ByteArrayOutputStream getFullTargetOutputArray() throws IOException {
-        ByteArrayOutputStream target = new ByteArrayOutputStream();
-        target.write((getResponseStatus() + getResponseHeader()).getBytes());
-        target.write(builder.getBody());
-        return target;
-    }
-
-    private String getResponseStatus() {
-        return builder.getStatusLine();
     }
 
     private String getResponseHeader() {
@@ -83,15 +65,15 @@ public class BasicRequestsTest {
 
         connection = host.getConnections().get(0);
         byte[] result = builder.getResponse();
-        String responseBodyMsg = helper.readResponseBodyResult(builder.getBody());
-        ByteArrayOutputStream target = getFullTargetOutputArray();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
+        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(target.toByteArray(), result);
-        assertEquals("HTTP/1.1 200 OK\r\n", builder.getStatusLine());
-        assertEquals("Server: Gina's Http Server\r\n" +
-                "Content-Length: " + helper.getContentLength() + "\r\n" +
-                "Content-Type: text/html\r\n\r\n", getResponseHeader());
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
+        assertTrue(responseBodyMsg.contains("Content-Type: text/html"));
         assertTrue(responseBodyMsg.contains("<h1>Hello, World!</h1>"));
         assertTrue(responseBodyMsg.contains("<p>You have reached the index.html file in testroot of the httpServer-spec project.</p>"));
     }
@@ -111,16 +93,16 @@ public class BasicRequestsTest {
 
         connection = host.getConnections().get(0);
         byte[] result = builder.getResponse();
-        String responseBodyMsg = readResponseBodyResult(builder.getBody());
-        ByteArrayOutputStream target = getFullTargetOutputArray();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
+        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(target.toByteArray(), result);
-        assertEquals("HTTP/1.1 200 OK\r\n", getResponseStatus());
-        assertEquals("Server: Gina's Http Server\r\n" +
-                "Content-Length: " + helper.getContentLength() + "\r\n" +
-                "Content-Type: text/html\r\n\r\n", getResponseHeader());
-        assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
+        assertTrue(responseBodyMsg.contains("Content-Type: text/html"));
+        assertTrue(responseBodyMsg.contains("<h1>Hello, World!</h1>"));
     }
 
     @Test
@@ -138,16 +120,16 @@ public class BasicRequestsTest {
 
         connection = host.getConnections().get(0);
         byte[] result = builder.getResponse();
-        String responseBodyMsg = readResponseBodyResult(builder.getBody());
-        ByteArrayOutputStream target = getFullTargetOutputArray();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
+        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(target.toByteArray(), result);
-        assertEquals("HTTP/1.1 200 OK\r\n", getResponseStatus());
-        assertEquals("Server: Gina's Http Server\r\n" +
-                "Content-Length: " + helper.getContentLength() + "\r\n" +
-                "Content-Type: text/html\r\n\r\n", getResponseHeader());
-        assertEquals("<h1>Hello, World!</h1>", responseBodyMsg);
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
+        assertTrue(responseBodyMsg.contains("Content-Type: text/html"));
+        assertTrue(responseBodyMsg.contains("<h1>Hello, World!</h1>"));
     }
 
     @Test
@@ -164,22 +146,30 @@ public class BasicRequestsTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
+        byte[] result = builder.getResponse();
         Map<String, Object> requestMap = new HashMap<String, Object>();
         requestMap.put("method", "GET");
         requestMap.put("resource", "/Leo");
         requestMap.put("httpVersion", "HTTP/1.1");
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = readResponseBodyResult(builder.getBody());
-        ByteArrayOutputStream target = getFullTargetOutputArray();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
+        ByteArrayOutputStream target = new ByteArrayOutputStream();
+        target.write(("HTTP/1.1 404 page not found\r\n" +
+                "Server: Gina's Http Server\r\n" +
+                "Content-Length: " + errorMsg.length() + "\r\n" +
+                "Content-Type: text/html\r\n\r\n").getBytes());
+        target.write(errorMsg.getBytes());
+
 
         assertThrows(ExceptionInfo.class, () -> {
-            connection.getRouter().route(requestMap);
+            connection.getRouter().route(requestMap, builder);
         });
+        System.out.println("helper.readResponseBodyResult(result) = " + helper.readResponseBodyResult(result));
+        System.out.println("helper.readResponseBodyResult(RESULT) = " + helper.readResponseBodyResult(target.toByteArray()));
         assertArrayEquals(target.toByteArray(), result);
-        assertEquals("HTTP/1.1 404 page not found\r\n", getResponseStatus());
-        assertTrue(getResponseHeader().contains("Content-Length: " + errorMsg.length()));
-        assertTrue(getResponseHeader().contains("Server: Gina's Http Server"));
-        assertEquals(errorMsg, responseBodyMsg);
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 404"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Type: text/html"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + errorMsg.length()));
     }
 
     @Test
@@ -208,15 +198,22 @@ public class BasicRequestsTest {
             parser.parse();
         });
 
-        String responseBodyMsg = readResponseBodyResult(builder.getBody());
         byte[] result = builder.getResponse();
-        ByteArrayOutputStream target = getFullTargetOutputArray();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
+        ByteArrayOutputStream target = new ByteArrayOutputStream();
+        target.write(("HTTP/1.1 404 page not found\r\n" +
+                "Server: Gina's Http Server\r\n" +
+                "Content-Length: " + errorMsg.length() + "\r\n" +
+                "Content-Type: text/html\r\n\r\n").getBytes());
+        target.write(errorMsg.getBytes());
 
+        System.out.println("helper.readResponseBodyResult(result) = " + helper.readResponseBodyResult(result));
         assertArrayEquals(target.toByteArray(), result);
-        assertEquals("HTTP/1.1 404 page not found\r\n", getResponseStatus());
-        assertTrue(getResponseHeader().contains("Content-Length: " + errorMsg.length()));
-        assertTrue(getResponseHeader().contains("Server: Gina's Http Server"));
-        assertEquals(errorMsg, responseBodyMsg);
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 404"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Type: text/html"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + errorMsg.length()));
+        assertTrue(responseBodyMsg.contains(errorMsg));
     }
 
 }

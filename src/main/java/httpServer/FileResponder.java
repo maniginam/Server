@@ -1,6 +1,8 @@
 package httpServer;
 
+import server.ExceptionInfo;
 import server.Responder;
+import server.ResponseBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,19 +13,17 @@ import java.util.Map;
 
 public class FileResponder implements Responder {
     private final String root;
-    private final String serverName;
-    private final HashMap<String, String> types;
-    HashMap<String, Object> response;
-    Map<String, String> header;
+    private final Map<String, String> types;
+    Map<String, Object> responseMap;
     private byte[] body;
     public Map<String, Object> request;
-    private boolean responding;
-    private Thread respond;
+    private String type;
+    private byte[] response;
 
     public FileResponder(String serverName, String root) {
         this.root = root;
-        this.serverName = serverName;
-        response = new HashMap<>();
+        responseMap = new HashMap<>();
+        responseMap.put("Server", serverName);
         types = new HashMap<>();
         types.put("html", "text/html");
         types.put("pdf", "application/pdf");
@@ -32,11 +32,15 @@ public class FileResponder implements Responder {
         types.put("png", "image/png");
     }
 
-    public Map<String, Object> respond(Map<String, Object> request) throws IOException {
-        responding = true;
+    public byte[] respond(Map<String, Object> request, ResponseBuilder builder) throws IOException, ExceptionInfo {
         this.request = request;
-        respond = new Thread(this);
-        respond.start();
+        type = determineFileType();
+        responseMap.put("body", readFile());
+        responseMap.put("statusCode", 200);
+        responseMap.put("Content-Type", type);
+        responseMap.put("Content-Length", String.valueOf(body.length));
+
+        response = builder.buildResponse(responseMap);
         return response;
     }
 
@@ -46,55 +50,15 @@ public class FileResponder implements Responder {
         return types.get(fileType);
     }
 
-    @Override
-    public void setResponse(int statusCode) {
-        response.put("statusCode", statusCode);
-        response.put("headers", header);
-        response.put("body", body);
-        responding = false;
-    }
-
-    @Override
-    public boolean isResponding() {
-        return responding;
-    }
-
-    @Override
-    public Map<String, Object> getResponse() {
-        return response;
-    }
-
-    @Override
-    public void setBody() throws IOException {
+    public byte[] readFile() throws ExceptionInfo, IOException {
         String resource = String.valueOf(request.get("resource"));
         Path path = Paths.get((root + resource));
-        body = Files.readAllBytes(path);
-    }
-
-    @Override
-    public void setHeader(String type) {
-        header = new HashMap<>();
-        header.put("Server", serverName);
-        header.put("Content-Type", type);
-        header.put("Content-Length", String.valueOf(body.length));
-    }
-
-    @Override
-    public void run() {
         try {
-            setBody();
+            body = Files.readAllBytes(path);
         } catch (IOException e) {
-            e.printStackTrace();
+            // TODO: 12/15/20 This feels ugly--ask about this
+            throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         }
-        String type;
-        type = determineFileType();
-        setHeader(type);
-        setResponse(200);
-    }
-
-    @Override
-    public void stop() throws InterruptedException {
-        if (respond != null)
-            respond.join();
+        return body;
     }
 }

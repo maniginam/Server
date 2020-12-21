@@ -26,7 +26,7 @@ public class FilesTests {
     public void setup() throws IOException {
         helper = new HttpTestHelper(1003);
         router = new Router();
-        Server.registerResponders(router, helper.root);
+        Server.registerResponders(router, builder, helper.root);
         builder = new HttpResponseBuilder();
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(1003, connectionFactory);
@@ -109,15 +109,14 @@ public class FilesTests {
         buffed.read();
 
         byte[] result = builder.getResponse();
-        byte[] responseBody = builder.getBody();
-        String status = builder.getStatusLine();
-        String responseHeader = builder.getHeaders();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", status);
-        Assertions.assertEquals(helper.getResponseHeader(), responseHeader);
-        Assertions.assertArrayEquals(helper.getBody(), responseBody);
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
+        assertTrue(responseBodyMsg.contains("Content-Type: image/jpeg"));
         assertArrayEquals(target.toByteArray(), result);
     }
 
@@ -134,15 +133,14 @@ public class FilesTests {
         buffed.read();
 
         byte[] result = builder.getResponse();
-        byte[] responseBody = builder.getBody();
-        String status = builder.getStatusLine();
-        String responseHeader = builder.getHeaders();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", status);
-        Assertions.assertEquals(helper.getResponseHeader(), responseHeader);
-        Assertions.assertArrayEquals(helper.getBody(), responseBody);
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
+        assertTrue(responseBodyMsg.contains("Content-Type: image/jpeg"));
         assertArrayEquals(target.toByteArray(), result);
     }
 
@@ -159,15 +157,14 @@ public class FilesTests {
         buffed.read();
 
         byte[] result = builder.getResponse();
-        byte[] responseBody = builder.getBody();
-        String status = builder.getStatusLine();
-        String responseHeader = builder.getHeaders();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", status);
-        Assertions.assertEquals(helper.getResponseHeader(), responseHeader);
-        Assertions.assertArrayEquals(helper.getBody(), responseBody);
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
+        assertTrue(responseBodyMsg.contains("Content-Type: image/png"));
         assertArrayEquals(target.toByteArray(), result);
     }
 
@@ -184,15 +181,14 @@ public class FilesTests {
         buffed.read();
 
         byte[] result = builder.getResponse();
-        byte[] responseBody = builder.getBody();
-        String status = builder.getStatusLine();
-        String responseHeader = builder.getHeaders();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
         ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        Assertions.assertEquals("HTTP/1.1 200 OK\r\n", status);
-        Assertions.assertEquals(helper.getResponseHeader(), responseHeader);
-        Assertions.assertArrayEquals(helper.getBody(), responseBody);
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
+        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
+        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
+        assertTrue(responseBodyMsg.contains("Content-Type: application/pdf"));
         assertArrayEquals(target.toByteArray(), result);
     }
 }

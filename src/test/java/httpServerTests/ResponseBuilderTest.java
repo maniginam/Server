@@ -3,25 +3,25 @@ package httpServerTests;
 import httpServer.FileResponder;
 import httpServer.HttpResponseBuilder;
 import httpServer.RequestParser;
-import server.ExceptionInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.ExceptionInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResponseBuilderTest {
     private HttpTestHelper helper;
     private RequestParser parser;
     private FileResponder responder;
     private Map<String, Object> requestMap;
-    private Map<String, Object> response;
     private HttpResponseBuilder builder;
+    private byte[] response;
+    private Map<String, Object> responseMap;
 
     @BeforeEach
     public void setup() throws IOException {
@@ -34,27 +34,33 @@ public class ResponseBuilderTest {
         String request = "GET HTTP/1.1\r\n\r\n";
         String root = helper.root;
         parser = helper.getParser(request);
-        requestMap = parser.parse();
+        builder = new HttpResponseBuilder();
         responder = new FileResponder("Leo's Server", root);
-        response = responder.respond(requestMap);
+        responseMap = new HashMap<>();
 
         helper.setResource("/index.html");
+        responseMap.put("statusCode", 200);
+        responseMap.put("Server", "Leo's Server");
+        responseMap.put("Content-Length", +helper.getContentLength());
+        responseMap.put("Content-Type", "text/html");
+        responseMap.put("body", helper.getBody());
+
+        byte[] result = builder.buildResponse(responseMap);
+        String message = helper.readResponseBodyResult(result);
+
         ByteArrayOutputStream target = new ByteArrayOutputStream();
-        target.write("HTTP/1.1 200 OK\r\n".getBytes());
-        target.write("Server: Leo's Server\r\n".getBytes());
-        target.write(("Content-Length: " + helper.getContentLength() + "\r\n").getBytes());
-        target.write("Content-Type: text/html\r\n".getBytes());
-        target.write("\r\n".getBytes());
+        target = new ByteArrayOutputStream();
+        target.write(("HTTP/1.1 200 OK\r\n" +
+                "Server: Leo's Server\r\n" +
+                "Content-Length: " + helper.getContentLength() + "\r\n" +
+                "Content-Type: text/html\r\n\r\n").getBytes());
         target.write(helper.getBody());
 
-        response = responder.respond(requestMap);
-        builder = new HttpResponseBuilder();
-        byte[] result = builder.buildResponse(response);
+        assertTrue(message.contains("HTTP/1.1 200 OK"));
+        assertTrue(message.contains("Server: Leo's Server"));
+        assertTrue(message.contains("Content-Length: " + helper.getContentLength()));
+        assertTrue(message.contains("Content-Type: text/html"));
 
-        assertEquals("HTTP/1.1 200 OK\r\n", builder.getStatusLine());
-        assertEquals("Server: Leo's Server\r\n" +
-                "Content-Length: " + helper.getContentLength() + "\r\n" +
-                "Content-Type: text/html\r\n\r\n", builder.getHeaders());
         assertArrayEquals(helper.getBody(), builder.getBody());
         assertArrayEquals(target.toByteArray(), result);
 

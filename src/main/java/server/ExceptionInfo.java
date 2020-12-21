@@ -8,9 +8,10 @@ import java.util.Map;
 
 public class ExceptionInfo extends Throwable {
     public static String serverName;
+    public static ResponseBuilder builder;
     private ExceptionInfoResponder responder;
     private final Map<String, Object> request;
-    private final Map<String, Object> response;
+    private final byte[] response;
     private String message;
 
     public ExceptionInfo(String message) throws IOException, ExceptionInfo {
@@ -19,10 +20,10 @@ public class ExceptionInfo extends Throwable {
         request = new HashMap<String, Object>();
         request.put("message", message);
         responder = new ExceptionInfoResponder(serverName);
-        response = responder.respond(request);
+        response = responder.respond(request, builder);
     }
 
-    public Map<String, Object> getResponse() {
+    public byte[] getResponse() {
         return response;
     }
 

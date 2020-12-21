@@ -25,7 +25,7 @@ public class MultiPartTest {
         int port = 1988;
         helper = new HttpTestHelper(port);
         router = new Router();
-        Server.registerResponders(router, helper.root);
+        Server.registerResponders(router, builder, helper.root);
         builder = new HttpResponseBuilder();
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(port, connectionFactory);
@@ -64,22 +64,18 @@ public class MultiPartTest {
         output.write(helper.getBody());
         output.write(("--" + boundary + "--\r\n\r\n").getBytes());
         buffed.read();
-        Thread.sleep(100);
 
         connection = host.getConnections().get(0);
-
-
-
-        String status = builder.getStatusLine();
-        String header = builder.getHeaders();
-        String body = helper.readResponseBodyResult(builder.getBody());
+        byte[] result = builder.getResponse();
+        String responseBodyMsg = helper.readResponseBodyResult(result);
+        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
 
         assertTrue(connection.getRouter().getResponder() instanceof MultiPartResponder);
-        assertTrue(status.contains("HTTP/1.1 200 OK"));
-        assertTrue(header.contains("Content-Type: application/octet-stream"));
-        assertTrue(body.contains("<h2>POST Form</h2>"));
-        assertTrue(body.contains("<li>file name: BruslyDog.jpeg</li>"));
-        assertTrue(body.contains("<li>file size: 92990</li>"));
+        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
+        assertTrue(responseBodyMsg.contains("Content-Type: application/octet-stream"));
+        assertTrue(responseBodyMsg.contains("<h2>POST Form</h2>"));
+        assertTrue(responseBodyMsg.contains("<li>file name: BruslyDog.jpeg</li>"));
+        assertTrue(responseBodyMsg.contains("<li>file size: 92990</li>"));
     }
 }
 

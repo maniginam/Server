@@ -1,8 +1,8 @@
 package httpServerTests;
 
 import httpServer.RequestParser;
-import server.ExceptionInfo;
 import org.junit.jupiter.api.Test;
+import server.ExceptionInfo;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RequestParserTest {
 
@@ -78,22 +77,5 @@ public class RequestParserTest {
         RequestParser parser = new RequestParser(buffedInput);
         Map<String, Object> result = parser.parse();
         assertEquals(target, result);
-    }
-
-    @Test
-    public void garbageMethod() throws IOException, ExceptionInfo {
-        String request = "Rex /index.html HTTP/1.1\r\n\r\n";
-
-        PipedInputStream inputPipe = new PipedInputStream();
-        PipedOutputStream outputPipe = new PipedOutputStream();
-
-        inputPipe.connect(outputPipe);
-        outputPipe.write(request.getBytes());
-        BufferedInputStream buffedInput = new BufferedInputStream(inputPipe);
-
-        RequestParser parser = new RequestParser(buffedInput);
-        assertThrows(ExceptionInfo.class, () -> {
-            parser.parse();
-        });
     }
 }

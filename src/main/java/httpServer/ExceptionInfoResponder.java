@@ -1,80 +1,41 @@
 package httpServer;
 
+import server.ExceptionInfo;
 import server.Responder;
+import server.ResponseBuilder;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ExceptionInfoResponder implements Responder {
-    Map<String, Object> response;
+    Map<String, Object> responseMap;
     Map<String, String> header;
     private byte[] body;
     private boolean bodyIsSet;
     private String serverName;
     private Map<String, Object> request;
-    private boolean responding;
-    private Thread respond;
+    private byte[] response;
 
     public ExceptionInfoResponder(String serverName) {
-        this.serverName = serverName;
-        response = new HashMap<>();
+        responseMap = new HashMap<>();
+        responseMap.put("Server", serverName);
+        responseMap.put("statusCode", 404);
+        responseMap.put("Content-Type", "text/html");
     }
 
-    @Override
-    public Map<String, Object> respond(Map<String, Object> request) {
-        responding = true;
+    public byte[] respond(Map request, ResponseBuilder builder) throws IOException, ExceptionInfo {
         this.request = request;
-        respond = new Thread(this);
-        respond.start();
+        responseMap.put("body", makeMessage());
+        responseMap.put("Content-Length", String.valueOf(body.length));
+        response = builder.buildResponse(responseMap);
         return response;
     }
 
-
-    @Override
-    public void setHeader(String type) {
-        if (!bodyIsSet)
-            setBody();
-        header = new HashMap<>();
-        header.put("Server", serverName);
-        header.put("Content-Type", type);
-        header.put("Content-Length", String.valueOf(body.length));
-    }
-
-    @Override
-    public void setBody() {
+    public byte[] makeMessage() {
         String message = String.valueOf(request.get("message"));
         bodyIsSet = true;
         body = ("<h1>" + message + "</h1>").getBytes();
-    }
-
-    @Override
-    public void setResponse(int statusCode) {
-        response.put("statusCode", statusCode);
-        response.put("headers", header);
-        response.put("body", body);
-        responding = false;
-    }
-
-    @Override
-    public boolean isResponding() {
-        return responding;
-    }
-
-    @Override
-    public Map<String, Object> getResponse() {
-        return response;
-    }
-
-    @Override
-    public void stop() throws InterruptedException {
-        if (respond != null)
-            respond.join();
-    }
-
-    @Override
-    public void run() {
-        setBody();
-        setHeader("text/html");
-        setResponse(200);
+        return body;
     }
 }

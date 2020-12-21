@@ -28,7 +28,7 @@ public class PingTests {
         int port = 7115;
         helper = new HttpTestHelper(port);
         router = new Router();
-        Server.registerResponders(router, helper.root);
+        Server.registerResponders(router, builder, helper.root);
         builder = new HttpResponseBuilder();
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(port, connectionFactory);
@@ -95,16 +95,15 @@ public class PingTests {
         buffed = helper.getBuffedInput();
 
         output.write(request1.getBytes());
+        output.write(request2.getBytes());
         buffed.read();
 
         String response1 = helper.readResponseBodyResult(builder.getBody());
         Responder responder1 = router.getResponder();
 
-        output.write(request2.getBytes());
+        Thread.sleep(100);
         String response2 = helper.readResponseBodyResult(builder.getBody());
         Responder responder2 = router.getResponder();
-        System.out.println("response1 = " + response1);
-        System.out.println("response2 = " + response2);
 
         assertTrue(responder1 instanceof PingResponder);
         assertTrue(response1.contains("<h2>Ping</h2>"));

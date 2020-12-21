@@ -21,6 +21,7 @@ public class HttpConnection implements Connection {
     private Map<String, Object> responseMap;
     private Thread routerThread;
     private List<Thread> routes;
+    private byte[] response;
 
     public HttpConnection(SocketHost host, Socket socket, Router router, HttpResponseBuilder builder) throws IOException {
         this.host = host;
@@ -46,13 +47,10 @@ public class HttpConnection implements Connection {
                     parser = new RequestParser(buffedInput);
                     try {
                         Map<String, Object> request = parser.parse();
-                        responseMap = router.route(request);
+                        response = router.route(request, builder);
                     } catch (ExceptionInfo e) {
-                        responseMap = e.getResponse();
+                        response = e.getResponse();
                     }
-                    while (responseMap.isEmpty())
-                        Thread.sleep(1);
-                    byte[] response = builder.buildResponse(responseMap);
                     if (response != null) {
                         send(response);
                     }
@@ -73,7 +71,6 @@ public class HttpConnection implements Connection {
     }
 
     public void stop() throws InterruptedException {
-        router.stop();
         if (thread != null)
             thread.join();
     }
@@ -85,15 +82,6 @@ public class HttpConnection implements Connection {
     @Override
     public Router getRouter() {
         return router;
-    }
-
-    public RequestParser getParser() {
-        return parser;
-    }
-
-
-    public ResponseBuilder getResponseBuilder() {
-        return builder;
     }
 
 }

@@ -1,7 +1,12 @@
 package httpServerTests;
 
-import httpServer.*;
-import server.*;
+import httpServer.HttpConnection;
+import httpServer.HttpResponseBuilder;
+import httpServer.RequestParser;
+import server.Connection;
+import server.ConnectionFactory;
+import server.Router;
+import server.SocketHost;
 
 import java.io.*;
 import java.net.Socket;
@@ -39,6 +44,8 @@ public class HttpTestHelper {
             type = resource.split("\\.")[resource.split("\\.").length - 1];
             if (type.contains("pdf"))
                 type = "application/pdf";
+            else if (type.contains("html"))
+                type = "text/html";
             else if (type.contains("jpg"))
                 type = "image/jpeg";
             else type = "image/" + type;
@@ -108,10 +115,11 @@ public class HttpTestHelper {
     }
 
     public ByteArrayOutputStream getFullTargetOutputArray() throws IOException {
-        builder = new HttpResponseBuilder();
         ByteArrayOutputStream target = new ByteArrayOutputStream();
-        target.write(getResponseStatus().getBytes());
-        target.write(getResponseHeader().getBytes());
+        target.write(("HTTP/1.1 200 OK\r\n" +
+                "Server: Gina's Http Server\r\n" +
+                "Content-Length: " + contentLength + "\r\n" +
+                "Content-Type: " + type + "\r\n\r\n").getBytes());
         target.write(body);
         return target;
     }
@@ -135,6 +143,10 @@ public class HttpTestHelper {
         BufferedInputStream buffedInput = new BufferedInputStream(inputPipe);
 
         return new RequestParser(buffedInput);
+    }
+
+    public String getType() {
+        return type;
     }
 }
 

@@ -1,7 +1,6 @@
 package serverTests;
 
-import server.*;
-import httpServer.*;
+import httpServer.Server;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,13 +9,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerTest {
     private TestHelper helper;
 
     @BeforeEach
-    public void setup() throws IOException, InterruptedException {
+    public void setup() throws IOException {
         helper = new TestHelper(1003);
     }
 
@@ -106,20 +105,6 @@ public class ServerTest {
         String result = Server.message;
 
         assertEquals(message, result);
-    }
-
-    @Test
-    public void registersFileResponder() throws IOException, ExceptionInfo, InterruptedException {
-        Router router = new Router();
-        Server.registerResponders(router, helper.root);
-        Map<String, Object> request = new HashMap<String, Object>();
-        request.put("method", "GET");
-        request.put("resource", "/index.html");
-
-        router.route(request);
-        Responder result = router.getResponder();
-
-        assertTrue(result instanceof FileResponder);
     }
 
 

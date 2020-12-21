@@ -14,10 +14,8 @@ public class Router {
     private String responderPointer;
     private String method;
     private String resource;
-    private Map<String, Object> response;
+    private byte[] response;
     private Map<String, Object> request;
-    private Thread route;
-    private List<Thread> routes;
     private List<Responder> responders;
 
     public Router() {
@@ -26,14 +24,11 @@ public class Router {
         responders = new ArrayList<>();
     }
 
-    public Map<String, Object> route(Map<String, Object> request) throws IOException, ExceptionInfo, InterruptedException {
+    public byte[] route(Map<String, Object> request, ResponseBuilder builder) throws IOException, ExceptionInfo, InterruptedException {
         this.request = request;
         if (request != null) {
             method = String.valueOf(request.get("method"));
             resource = String.valueOf(request.get("resource"));
-            String target = resource;
-            if (resource.contains("\r\n"))
-                target = resource.split("\r\n")[0];
             responderPointer = null;
             for (String resourceRegex : resourceRegexs) {
                 if (Pattern.matches(resourceRegex, resource)) {
@@ -42,7 +37,7 @@ public class Router {
             }
             if (responderPointer != null && methods.containsKey(method)) {
                 responder = methods.get(method).get(responderPointer);
-                response = getResponder().respond(request);
+                response = getResponder().respond(request, builder);
                 return response;
             } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
@@ -63,10 +58,5 @@ public class Router {
 
     public Responder getResponder() {
         return responder;
-    }
-
-    public void stop() throws InterruptedException {
-        if (route != null)
-            route.join();
     }
 }

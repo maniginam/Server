@@ -33,16 +33,17 @@ public class Server {
 
     private static void startServer() throws IOException, InterruptedException {
         Router router = new Router();
-        registerResponders(router, root);
         HttpResponseBuilder builder = new HttpResponseBuilder();
+        registerResponders(router, builder, root);
         HttpConnectionFactory connectionFactory = new HttpConnectionFactory(router, builder);
         SocketHost host = new SocketHost(port, connectionFactory);
         host.start();
         host.join();
     }
 
-    public static void registerResponders(Router router, String root) {
+    public static void registerResponders(Router router, ResponseBuilder builder, String root) {
         ExceptionInfo.serverName = serverName;
+        ExceptionInfo.builder = builder;
         router.registerResponder("GET", "([\\/\\w\\.])+(.html)$", new FileResponder(serverName, root));
         router.registerResponder("GET", "([/listing])+([/img]*)$", new ListingResponder(serverName, root));
 //        router.registerResponder("GET", "([\\/\\w])+([\\/\\w])*$", new ListingResponder(serverName, root));
