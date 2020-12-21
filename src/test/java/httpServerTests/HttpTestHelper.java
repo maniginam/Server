@@ -1,7 +1,7 @@
-package test.java.httpServerTests;
+package httpServerTests;
 
-import main.java.httpServer.*;
-import main.java.server.*;
+import httpServer.*;
+import server.*;
 
 import java.io.*;
 import java.net.Socket;

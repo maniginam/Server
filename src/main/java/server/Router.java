@@ -1,4 +1,4 @@
-package main.java.server;
+package server;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,13 +14,20 @@ public class Router {
     private String responderPointer;
     private String method;
     private String resource;
+    private Map<String, Object> response;
+    private Map<String, Object> request;
+    private Thread route;
+    private List<Thread> routes;
+    private List<Responder> responders;
 
     public Router() {
         methods = new HashMap<>();
         resourceRegexs = new ArrayList<>();
+        responders = new ArrayList<>();
     }
 
     public Map<String, Object> route(Map<String, Object> request) throws IOException, ExceptionInfo, InterruptedException {
+        this.request = request;
         if (request != null) {
             method = String.valueOf(request.get("method"));
             resource = String.valueOf(request.get("resource"));
@@ -29,20 +36,21 @@ public class Router {
                 target = resource.split("\r\n")[0];
             responderPointer = null;
             for (String resourceRegex : resourceRegexs) {
-                if (Pattern.matches(resourceRegex, target)) {
+                if (Pattern.matches(resourceRegex, resource)) {
                     responderPointer = resourceRegex;
                 }
             }
-
             if (responderPointer != null && methods.containsKey(method)) {
                 responder = methods.get(method).get(responderPointer);
-                Map<String, Object> response = responder.respond(request);
+                response = getResponder().respond(request);
                 return response;
             } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
     }
 
+
     public void registerResponder(String method, String resourceRegex, Responder responder) {
+        responders.add(responder);
         resourceRegexs.add(resourceRegex);
         if (methods.containsKey(method))
             methods.get(method).put(resourceRegex, responder);
@@ -55,5 +63,10 @@ public class Router {
 
     public Responder getResponder() {
         return responder;
+    }
+
+    public void stop() throws InterruptedException {
+        if (route != null)
+            route.join();
     }
 }

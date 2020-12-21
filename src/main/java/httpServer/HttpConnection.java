@@ -1,11 +1,13 @@
-package main.java.httpServer;
+package httpServer;
 
-import main.java.server.*;
+import server.*;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class HttpConnection implements Connection {
@@ -18,6 +20,7 @@ public class HttpConnection implements Connection {
     private OutputStream output;
     private Map<String, Object> responseMap;
     private Thread routerThread;
+    private List<Thread> routes;
 
     public HttpConnection(SocketHost host, Socket socket, Router router, HttpResponseBuilder builder) throws IOException {
         this.host = host;
@@ -25,6 +28,7 @@ public class HttpConnection implements Connection {
         this.router = router;
         this.builder = builder;
         output = socket.getOutputStream();
+        routes = new ArrayList<>();
     }
 
     public void start() {
@@ -46,12 +50,16 @@ public class HttpConnection implements Connection {
                     } catch (ExceptionInfo e) {
                         responseMap = e.getResponse();
                     }
+                    while (responseMap.isEmpty())
+                        Thread.sleep(1);
                     byte[] response = builder.buildResponse(responseMap);
                     if (response != null) {
                         send(response);
                     }
 
-                } else Thread.sleep(1);
+                } else {
+                    Thread.sleep(1);
+                }
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -65,6 +73,7 @@ public class HttpConnection implements Connection {
     }
 
     public void stop() throws InterruptedException {
+        router.stop();
         if (thread != null)
             thread.join();
     }

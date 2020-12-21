@@ -1,6 +1,6 @@
-package test.java.serverTests;
+package serverTests;
 
-import main.java.server.ResponseBuilder;
+import server.ResponseBuilder;
 
 import java.io.IOException;
 import java.util.Map;

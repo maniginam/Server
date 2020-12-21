@@ -1,10 +1,10 @@
-package test.java.serverTests;
+package serverTests;
 
-import main.java.httpServer.FileResponder;
-import main.java.httpServer.ListingResponder;
-import main.java.server.ExceptionInfo;
-import main.java.server.Responder;
-import main.java.server.Router;
+import httpServer.FileResponder;
+import httpServer.ListingResponder;
+import server.ExceptionInfo;
+import server.Responder;
+import server.Router;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
-package main.java.httpServer;
+package httpServer;
 
-import main.java.server.ResponseBuilder;
+import server.ResponseBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

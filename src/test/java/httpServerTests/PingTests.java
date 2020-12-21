@@ -1,10 +1,10 @@
-package test.java.httpServerTests;
+package httpServerTests;
 
-import main.java.httpServer.*;
+import httpServer.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import main.java.server.*;
+import server.*;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -90,7 +90,6 @@ public class PingTests {
         String request1 = "GET /ping/2 HTTP/1.1\r\n\r\n";
         String request2 = "GET /ping HTTP/1.1\r\n\r\n";
         host.start();
-        helper.connect();
         helper.connect();
         output = helper.getOutput();
         buffed = helper.getBuffedInput();

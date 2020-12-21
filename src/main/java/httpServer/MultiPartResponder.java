@@ -1,6 +1,6 @@
-package main.java.httpServer;
+package httpServer;
 
-import main.java.server.*;
+import server.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,6 +14,8 @@ public class MultiPartResponder implements Responder {
     private byte[] body;
     private String fileName;
     private String type;
+    private boolean responding;
+    private Thread respond;
 
     public MultiPartResponder(String serverName) {
         this.serverName = serverName;
@@ -22,11 +24,11 @@ public class MultiPartResponder implements Responder {
 
     @Override
     public Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo {
+        responding = true;
         this.request = request;
         type = "application/octet-stream";
-        setBody();
-        setHeader(type);
-        setResponse(200);
+        respond = new Thread(this);
+        respond.start();
         return response;
     }
 
@@ -35,13 +37,21 @@ public class MultiPartResponder implements Responder {
         response.put("statusCode", statusCode);
         response.put("headers", header);
         response.put("body", body);
+        responding = false;
     }
 
     @Override
-    public void setHeader(String type) throws IOException {
-        if (body == null) {
-            setBody();
-        }
+    public boolean isResponding() {
+        return responding;
+    }
+
+    @Override
+    public Map<String, Object> getResponse() {
+        return response;
+    }
+
+    @Override
+    public void setHeader(String type) {
         header = new HashMap<>();
         header.put("Server", serverName);
         header.put("Content-Type", type);
@@ -57,4 +67,20 @@ public class MultiPartResponder implements Responder {
         body = bodyMsg.getBytes();
     }
 
+    @Override
+    public void run() {
+        try {
+            setBody();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+            setHeader(type);
+        setResponse(200);
+    }
+
+    @Override
+    public void stop() throws InterruptedException {
+        if (respond != null)
+            respond.join();
+    }
 }

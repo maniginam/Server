@@ -1,8 +1,7 @@
-package main.java.httpServer;
+package httpServer;
 
-import main.java.server.*;
+import server.Responder;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,23 +12,27 @@ public class ExceptionInfoResponder implements Responder {
     private boolean bodyIsSet;
     private String serverName;
     private Map<String, Object> request;
+    private boolean responding;
+    private Thread respond;
 
     public ExceptionInfoResponder(String serverName) {
         this.serverName = serverName;
         response = new HashMap<>();
     }
 
-    public Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo {
+    @Override
+    public Map<String, Object> respond(Map<String, Object> request) {
+        responding = true;
         this.request = request;
-        setBody();
-        setHeader("text/html");
-        setResponse(404);
+        respond = new Thread(this);
+        respond.start();
         return response;
     }
 
+
     @Override
-    public void setHeader(String type) throws IOException {
-        if(!bodyIsSet)
+    public void setHeader(String type) {
+        if (!bodyIsSet)
             setBody();
         header = new HashMap<>();
         header.put("Server", serverName);
@@ -38,7 +41,7 @@ public class ExceptionInfoResponder implements Responder {
     }
 
     @Override
-    public void setBody() throws IOException {
+    public void setBody() {
         String message = String.valueOf(request.get("message"));
         bodyIsSet = true;
         body = ("<h1>" + message + "</h1>").getBytes();
@@ -49,5 +52,29 @@ public class ExceptionInfoResponder implements Responder {
         response.put("statusCode", statusCode);
         response.put("headers", header);
         response.put("body", body);
+        responding = false;
+    }
+
+    @Override
+    public boolean isResponding() {
+        return responding;
+    }
+
+    @Override
+    public Map<String, Object> getResponse() {
+        return response;
+    }
+
+    @Override
+    public void stop() throws InterruptedException {
+        if (respond != null)
+            respond.join();
+    }
+
+    @Override
+    public void run() {
+        setBody();
+        setHeader("text/html");
+        setResponse(200);
     }
 }

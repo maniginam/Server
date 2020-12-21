@@ -1,6 +1,6 @@
-package main.java.httpServer;
+package httpServer;
 
-import main.java.server.ExceptionInfo;
+import server.ExceptionInfo;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;

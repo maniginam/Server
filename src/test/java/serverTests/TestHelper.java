@@ -1,6 +1,6 @@
-package test.java.serverTests;
+package serverTests;
 
-import main.java.server.*;
+import server.*;
 
 import java.io.*;
 import java.net.Socket;

@@ -1,9 +1,9 @@
-package test.java.serverTests;
+package serverTests;
 
-import main.java.server.Connection;
-import main.java.server.ResponseBuilder;
-import main.java.server.Router;
-import main.java.server.SocketHost;
+import server.Connection;
+import server.ResponseBuilder;
+import server.Router;
+import server.SocketHost;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

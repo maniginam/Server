@@ -1,6 +1,6 @@
-package main.java.server;
+package server;
 
-import main.java.httpServer.ExceptionInfoResponder;
+import httpServer.ExceptionInfoResponder;
 
 import java.io.IOException;
 import java.util.HashMap;

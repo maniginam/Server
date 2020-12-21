@@ -1,8 +1,7 @@
-package main.java.httpServer;
+package httpServer;
 
-import main.java.server.*;
+import server.Responder;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,6 +13,8 @@ public class PingResponder implements Responder {
     private Map<String, Object> request;
     private byte[] body;
     private Map<String, String> header;
+    private boolean responding;
+    private Thread respond;
 
     public PingResponder(String serverName) {
         this.serverName = serverName;
@@ -21,11 +22,12 @@ public class PingResponder implements Responder {
     }
 
     @Override
-    public Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo, InterruptedException {
+    public Map<String, Object> respond(Map<String, Object> request) throws InterruptedException {
+        System.out.println("request = " + request);
+        responding = true;
         this.request = request;
-        setBody();
-        setHeader("text/html");
-        setResponse(200);
+        respond = new Thread(this);
+        respond.start();
         return response;
     }
 
@@ -34,13 +36,21 @@ public class PingResponder implements Responder {
         response.put("statusCode", statusCode);
         response.put("headers", header);
         response.put("body", body);
+        responding = false;
     }
 
     @Override
-    public void setHeader(String type) throws IOException, ExceptionInfo, InterruptedException {
-        if (body == null) {
-            setBody();
-        }
+    public boolean isResponding() {
+        return responding;
+    }
+
+    @Override
+    public Map<String, Object> getResponse() {
+        return response;
+    }
+
+    @Override
+    public void setHeader(String type) {
         header = new HashMap<>();
         header.put("Server", serverName);
         header.put("Content-Type", type);
@@ -73,4 +83,20 @@ public class PingResponder implements Responder {
         else return 0;
     }
 
+    @Override
+    public void run() {
+        try {
+            setBody();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        setHeader("text/html");
+        setResponse(200);
+    }
+
+    @Override
+    public void stop() throws InterruptedException {
+        if (respond != null)
+            respond.join();
+    }
 }

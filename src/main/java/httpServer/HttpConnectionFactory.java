@@ -1,6 +1,6 @@
-package main.java.httpServer;
+package httpServer;
 
-import main.java.server.*;
+import server.*;
 
 import java.io.IOException;
 import java.net.Socket;

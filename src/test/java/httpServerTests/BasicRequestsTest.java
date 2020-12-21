@@ -1,13 +1,13 @@
-package test.java.httpServerTests;
+package httpServerTests;
 
-import main.java.httpServer.FileResponder;
-import main.java.httpServer.HttpResponseBuilder;
-import main.java.httpServer.RequestParser;
-import main.java.httpServer.Server;
-import main.java.server.Connection;
-import main.java.server.ExceptionInfo;
-import main.java.server.Router;
-import main.java.server.SocketHost;
+import httpServer.FileResponder;
+import httpServer.HttpResponseBuilder;
+import httpServer.RequestParser;
+import httpServer.Server;
+import server.Connection;
+import server.ExceptionInfo;
+import server.Router;
+import server.SocketHost;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -195,18 +195,23 @@ public class BasicRequestsTest {
         output.write(request.getBytes());
         buffed.read();
 
-        connection = host.getConnections().get(0);
-        Map<String, Object> requestMap = new HashMap<String, Object>();
-        requestMap.put("method", "REX");
-        requestMap.put("resource", "/index.html");
-        requestMap.put("httpVersion", "HTTP/1.1");
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = readResponseBodyResult(builder.getBody());
-        ByteArrayOutputStream target = getFullTargetOutputArray();
+        PipedInputStream inputPipe = new PipedInputStream();
+        PipedOutputStream outputPipe = new PipedOutputStream();
+
+        inputPipe.connect(outputPipe);
+        outputPipe.write(request.getBytes());
+        BufferedInputStream buffedInput = new BufferedInputStream(inputPipe);
+
+        RequestParser parser = new RequestParser(buffedInput);
 
         assertThrows(ExceptionInfo.class, () -> {
-            connection.getRouter().route(requestMap);
+            parser.parse();
         });
+
+        String responseBodyMsg = readResponseBodyResult(builder.getBody());
+        byte[] result = builder.getResponse();
+        ByteArrayOutputStream target = getFullTargetOutputArray();
+
         assertArrayEquals(target.toByteArray(), result);
         assertEquals("HTTP/1.1 404 page not found\r\n", getResponseStatus());
         assertTrue(getResponseHeader().contains("Content-Length: " + errorMsg.length()));

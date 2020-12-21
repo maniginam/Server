@@ -1,10 +1,10 @@
-package test.java.httpServerTests;
+package httpServerTests;
 
-import main.java.httpServer.*;
+import httpServer.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import main.java.server.*;
+import server.*;
 
 import java.io.*;
 

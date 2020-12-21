@@ -1,9 +1,9 @@
-package test.java.httpServerTests;
+package httpServerTests;
 
-import main.java.httpServer.FileResponder;
-import main.java.httpServer.HttpResponseBuilder;
-import main.java.httpServer.RequestParser;
-import main.java.server.ExceptionInfo;
+import httpServer.FileResponder;
+import httpServer.HttpResponseBuilder;
+import httpServer.RequestParser;
+import server.ExceptionInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,6 @@ public class ResponseBuilderTest {
         target.write("\r\n".getBytes());
         target.write(helper.getBody());
 
-        responder = new FileResponder("Leo's Server", root);
         response = responder.respond(requestMap);
         builder = new HttpResponseBuilder();
         byte[] result = builder.buildResponse(response);

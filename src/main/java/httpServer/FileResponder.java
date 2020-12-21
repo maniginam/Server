@@ -1,7 +1,6 @@
-package main.java.httpServer;
+package httpServer;
 
-import main.java.server.ExceptionInfo;
-import main.java.server.Responder;
+import server.Responder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,11 +17,13 @@ public class FileResponder implements Responder {
     Map<String, String> header;
     private byte[] body;
     public Map<String, Object> request;
+    private boolean responding;
+    private Thread respond;
 
     public FileResponder(String serverName, String root) {
         this.root = root;
         this.serverName = serverName;
-        response = new HashMap<String, Object>();
+        response = new HashMap<>();
         types = new HashMap<>();
         types.put("html", "text/html");
         types.put("pdf", "application/pdf");
@@ -31,13 +32,11 @@ public class FileResponder implements Responder {
         types.put("png", "image/png");
     }
 
-    public Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException {
+        responding = true;
         this.request = request;
-        setBody();
-        String type;
-        type = determineFileType();
-        setHeader(type);
-        setResponse(200);
+        respond = new Thread(this);
+        respond.start();
         return response;
     }
 
@@ -52,18 +51,24 @@ public class FileResponder implements Responder {
         response.put("statusCode", statusCode);
         response.put("headers", header);
         response.put("body", body);
+        responding = false;
     }
 
     @Override
-    public void setBody() throws ExceptionInfo, IOException {
+    public boolean isResponding() {
+        return responding;
+    }
+
+    @Override
+    public Map<String, Object> getResponse() {
+        return response;
+    }
+
+    @Override
+    public void setBody() throws IOException {
         String resource = String.valueOf(request.get("resource"));
         Path path = Paths.get((root + resource));
-        try {
-            body = Files.readAllBytes(path);
-        } catch (IOException e) {
-            // TODO: 12/15/20 This feels ugly--ask about this
-            throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
-        }
+        body = Files.readAllBytes(path);
     }
 
     @Override
@@ -72,5 +77,24 @@ public class FileResponder implements Responder {
         header.put("Server", serverName);
         header.put("Content-Type", type);
         header.put("Content-Length", String.valueOf(body.length));
+    }
+
+    @Override
+    public void run() {
+        try {
+            setBody();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String type;
+        type = determineFileType();
+        setHeader(type);
+        setResponse(200);
+    }
+
+    @Override
+    public void stop() throws InterruptedException {
+        if (respond != null)
+            respond.join();
     }
 }

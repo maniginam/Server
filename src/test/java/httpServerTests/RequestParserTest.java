@@ -1,7 +1,7 @@
-package test.java.httpServerTests;
+package httpServerTests;
 
-import main.java.httpServer.RequestParser;
-import main.java.server.ExceptionInfo;
+import httpServer.RequestParser;
+import server.ExceptionInfo;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
