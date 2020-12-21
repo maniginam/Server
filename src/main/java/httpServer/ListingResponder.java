@@ -11,7 +11,6 @@ import java.util.Map;
 public class ListingResponder implements Responder {
     private final String root;
     Map<String, Object> responseMap;
-    Map<String, String> header;
     private byte[] body;
     private Map<String, Object> request;
     private byte[] response;
@@ -50,6 +49,10 @@ public class ListingResponder implements Responder {
             directory = new File(root + "/" + child);
         }
 
+        return writeListings(directory, parent, child);
+    }
+
+    private byte[] writeListings(File directory, String parent, String child) {
         File[] files = directory.listFiles();
         String bodyMsg = "<ul>";
         for (File file : files) {

@@ -53,10 +53,7 @@ public class FilesTests {
 
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
-
-        System.out.println("helper.readResponseBodyResult(result) = " + helper.readResponseBodyResult(result));
-        System.out.println("helper.readResponseBodyResult(target) = " + helper.readResponseBodyResult(target.toByteArray()));
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         if (router.getResponder() instanceof ListingResponder)
             assertTrue(router.getResponder() instanceof ListingResponder);
@@ -85,10 +82,7 @@ public class FilesTests {
 
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
-
-        System.out.println("helper.readResponseBodyResult(result) = " + helper.readResponseBodyResult(result));
-        System.out.println("helper.readResponseBodyResult(target) = " + helper.readResponseBodyResult(target.toByteArray()));
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         if (router.getResponder() instanceof ListingResponder)
             assertTrue(router.getResponder() instanceof ListingResponder);
@@ -97,10 +91,10 @@ public class FilesTests {
         assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
         assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
         assertTrue(responseBodyMsg.contains("Content-Type: text/html"));
-        Assertions.assertTrue(helper.readResponseBodyResult(helper.getBody()).contains("<ul>"));
-        Assertions.assertTrue(helper.readResponseBodyResult(helper.getBody()).contains("<li><a href=\"/img/BruslyDog.jpeg\">BruslyDog.jpeg</a></li>"));
-        Assertions.assertTrue(helper.readResponseBodyResult(helper.getBody()).contains("<li><a href=\"/img/decepticon.png\">decepticon.png</a></li>"));
-        Assertions.assertTrue(helper.readResponseBodyResult(helper.getBody()).contains("<li><a href=\"/img/HurricaneBabies.jpeg\">HurricaneBabies.jpeg</a></li>"));
+        Assertions.assertTrue(responseBodyMsg.contains("<ul>"));
+        Assertions.assertTrue(responseBodyMsg.contains("<li><a href=\"/img/BruslyDog.jpeg\">BruslyDog.jpeg</a></li>"));
+        Assertions.assertTrue(responseBodyMsg.contains("<li><a href=\"/img/decepticon.png\">decepticon.png</a></li>"));
+        Assertions.assertTrue(responseBodyMsg.contains("<li><a href=\"/img/HurricaneBabies.jpeg\">HurricaneBabies.jpeg</a></li>"));
     }
 
     @Test
@@ -117,7 +111,7 @@ public class FilesTests {
 
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
@@ -141,7 +135,7 @@ public class FilesTests {
 
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
@@ -165,7 +159,7 @@ public class FilesTests {
 
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
@@ -189,7 +183,7 @@ public class FilesTests {
 
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));

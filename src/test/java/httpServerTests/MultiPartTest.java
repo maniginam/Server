@@ -8,7 +8,7 @@ import server.*;
 
 import java.io.*;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultiPartTest {
     private HttpTestHelper helper;
@@ -68,7 +68,7 @@ public class MultiPartTest {
         connection = host.getConnections().get(0);
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         assertTrue(connection.getRouter().getResponder() instanceof MultiPartResponder);
         assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));

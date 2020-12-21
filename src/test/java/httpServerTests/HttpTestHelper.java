@@ -114,7 +114,7 @@ public class HttpTestHelper {
         return bodyLines;
     }
 
-    public ByteArrayOutputStream getFullTargetOutputArray() throws IOException {
+    public ByteArrayOutputStream getTargetResonse() throws IOException {
         ByteArrayOutputStream target = new ByteArrayOutputStream();
         target.write(("HTTP/1.1 200 OK\r\n" +
                 "Server: Gina's Http Server\r\n" +

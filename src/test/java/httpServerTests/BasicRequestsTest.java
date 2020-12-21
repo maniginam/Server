@@ -2,8 +2,8 @@ package httpServerTests;
 
 import httpServer.FileResponder;
 import httpServer.HttpResponseBuilder;
-import httpServer.RequestParser;
 import httpServer.Server;
+import httpServer.RequestParser;
 import server.Connection;
 import server.ExceptionInfo;
 import server.Router;
@@ -46,10 +46,6 @@ public class BasicRequestsTest {
             helper.getSocket().close();
     }
 
-    private String getResponseHeader() {
-        return builder.getHeaders();
-    }
-
     @Test
     public void submitBlankTargetRequest() throws IOException, ExceptionInfo, InterruptedException {
         host.start();
@@ -66,7 +62,7 @@ public class BasicRequestsTest {
         connection = host.getConnections().get(0);
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(target.toByteArray(), result);
@@ -94,7 +90,7 @@ public class BasicRequestsTest {
         connection = host.getConnections().get(0);
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(target.toByteArray(), result);
@@ -121,7 +117,7 @@ public class BasicRequestsTest {
         connection = host.getConnections().get(0);
         byte[] result = builder.getResponse();
         String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getFullTargetOutputArray();
+        ByteArrayOutputStream target = helper.getTargetResonse();
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(target.toByteArray(), result);
@@ -163,8 +159,6 @@ public class BasicRequestsTest {
         assertThrows(ExceptionInfo.class, () -> {
             connection.getRouter().route(requestMap, builder);
         });
-        System.out.println("helper.readResponseBodyResult(result) = " + helper.readResponseBodyResult(result));
-        System.out.println("helper.readResponseBodyResult(RESULT) = " + helper.readResponseBodyResult(target.toByteArray()));
         assertArrayEquals(target.toByteArray(), result);
         assertTrue(responseBodyMsg.contains("HTTP/1.1 404"));
         assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));

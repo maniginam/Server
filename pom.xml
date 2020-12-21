@@ -7,13 +7,14 @@
     <groupId>maniginam</groupId>
     <artifactId>server</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <name>Gina's Server</name>
     <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
 
     <properties>
-        <src.dir>server/src/main/java</src.dir>
+        <src.dir>src/main/java</src.dir>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}}</maven.compiler.source>

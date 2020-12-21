@@ -8,9 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerTest {
     private TestHelper helper;
@@ -80,7 +79,7 @@ public class ServerTest {
     public void submitREntry() throws Exception {
         String name = "Example http.Server\r\n";
         String portLine = "Running on port: 80.\r\n";
-        String filesLine = "Serving files from: /Users/maniginam/server/testroot";
+        String filesLine = "Serving files from: " + new File(".").getCanonicalPath() + "/testroot";
         String message = name + portLine + filesLine;
 
         Map<String, String> args = new HashMap<>();
@@ -97,7 +96,7 @@ public class ServerTest {
     public void messageOnlyFromPEntryWithNOX() throws Exception {
         String name = "Example http.Server\r\n";
         String portLine = "Running on port: 3141.\r\n";
-        String filesLine = "Serving files from: /Users/maniginam/server";
+        String filesLine = "Serving files from: " + new File(".").getCanonicalPath();
         String message = name + portLine + filesLine;
         Map<String, String> args = new HashMap<>();
         args.put("-p", "3141");
@@ -106,37 +105,6 @@ public class ServerTest {
         String result = Server.message;
 
         assertEquals(message, result);
-    }
-
-    @Test
-    public void regex() {
-        Pattern fileRegEx = Pattern.compile("\\..{3,4}$");
-        Pattern listRegEx = Pattern.compile("\\w[^(ping)|(form)]+");
-        Pattern pingRegEx = Pattern.compile("ping");
-        Pattern formRegEx = Pattern.compile("form\\?+");
-        Pattern postFormRegEx = Pattern.compile("form$");
-
-        assertTrue(fileRegEx.matcher("/hello.html").find());
-        assertTrue(fileRegEx.matcher("/hello/helloagain.jpg").find());
-        assertFalse(fileRegEx.matcher("/hello.hl").find());
-        assertFalse(fileRegEx.matcher("/hello").find());
-
-        assertTrue(listRegEx.matcher("/hello").find());
-        assertTrue(listRegEx.matcher("/hello/helloagain").find());
-//        assertFalse(listRegEx.matcher("/hello.hl").find());
-        assertFalse(listRegEx.matcher("/ping").find());
-        assertFalse(listRegEx.matcher("/form").find());
-
-        assertTrue(pingRegEx.matcher("/ping").find());
-        assertFalse(pingRegEx.matcher("/hello").find());
-
-        assertTrue(formRegEx.matcher("/form?").find());
-        assertFalse(formRegEx.matcher("/form").find());
-
-        assertTrue(postFormRegEx.matcher("/form").find());
-        assertFalse(postFormRegEx.matcher("/form?").find());
-
-
     }
 
 
