@@ -207,7 +207,6 @@ public class BasicRequestsTest {
                 "Content-Type: text/html\r\n\r\n").getBytes());
         target.write(errorMsg.getBytes());
 
-        System.out.println("helper.readResponseBodyResult(result) = " + helper.readResponseBodyResult(result));
         assertArrayEquals(target.toByteArray(), result);
         assertTrue(responseBodyMsg.contains("HTTP/1.1 404"));
         assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));

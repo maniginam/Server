@@ -1,11 +1,15 @@
 package httpServer;
 
-import server.*;
+import server.ExceptionInfo;
+import server.ResponseBuilder;
+import server.Router;
+import server.SocketHost;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class Server {
     public static String message;
@@ -44,16 +48,17 @@ public class Server {
     public static void registerResponders(Router router, ResponseBuilder builder, String root) {
         ExceptionInfo.serverName = serverName;
         ExceptionInfo.builder = builder;
-        router.registerResponder("GET", "([\\/\\w\\.])+(.html)$", new FileResponder(serverName, root));
-        router.registerResponder("GET", "([/listing])+([/img]*)$", new ListingResponder(serverName, root));
-//        router.registerResponder("GET", "([\\/\\w])+([\\/\\w])*$", new ListingResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(jpeg)$", new FileResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(jpg)$", new FileResponder(serverName, root));
-        router.registerResponder("GET", "([\\/*\\w\\.])+(png)$", new FileResponder(serverName, root));
-        router.registerResponder("GET", "([\\/\\w\\.])+(.pdf)$", new FileResponder(serverName, root));
-        router.registerResponder("GET", "([/ping\\/*])+(\\d*)", new PingResponder(serverName));
-        router.registerResponder("GET", "([/form\\?])(.*=.*)(&.*=.*)*", new FormResponder(serverName));
-        router.registerResponder("POST", "/form", new MultiPartResponder(serverName));
+        Pattern fileRegEx = Pattern.compile("\\..{3,4}$");
+        Pattern listRegEx = Pattern.compile("/listing+(\\/\\w)*");
+        Pattern pingRegEx = Pattern.compile("ping{1}(\\/\\d)*");
+        Pattern formRegEx = Pattern.compile("form\\?+");
+        Pattern postFormRegEx = Pattern.compile("form$");
+
+        router.registerResponder("GET", fileRegEx, new FileResponder(serverName, root));
+        router.registerResponder("GET", listRegEx, new ListingResponder(serverName, root));
+        router.registerResponder("GET", pingRegEx, new PingResponder(serverName));
+        router.registerResponder("GET", formRegEx, new FormResponder(serverName));
+        router.registerResponder("POST", postFormRegEx, new MultiPartResponder(serverName));
     }
 
     private static Map<String, String> makeArgMap(String[] args) {

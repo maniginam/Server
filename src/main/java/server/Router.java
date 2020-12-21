@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Router {
     private Responder responder;
-    private final Map<String, Map<String, Responder>> methods;
-    private final List<String> resourceRegexs;
-    private String responderPointer;
+    private final Map<String, HashMap<Pattern, Responder>> methods;
+    private final List<Pattern> resourceRegexs;
+    private Pattern responderPointer;
     private String method;
     private String resource;
     private byte[] response;
@@ -19,8 +20,8 @@ public class Router {
     private List<Responder> responders;
 
     public Router() {
-        methods = new HashMap<>();
-        resourceRegexs = new ArrayList<>();
+        methods = new HashMap<String, HashMap<Pattern, Responder>>();
+        resourceRegexs = new ArrayList<Pattern>();
         responders = new ArrayList<>();
     }
 
@@ -30,33 +31,33 @@ public class Router {
             method = String.valueOf(request.get("method"));
             resource = String.valueOf(request.get("resource"));
             responderPointer = null;
-            for (String resourceRegex : resourceRegexs) {
-                if (Pattern.matches(resourceRegex, resource)) {
-                    responderPointer = resourceRegex;
+            for (Pattern resourceRegex : resourceRegexs) {
+                Matcher m = resourceRegex.matcher(resource);
+                if (m.find()) {
+                    responder = methods.get(method).get(resourceRegex);
+                    break;
                 }
             }
-            if (responderPointer != null && methods.containsKey(method)) {
-                responder = methods.get(method).get(responderPointer);
-                response = getResponder().respond(request, builder);
-                return response;
-            } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
+            if (responder != null)
+                response = responder.respond(request, builder);
+            else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
+        return response;
     }
 
+        public void registerResponder (String method, Pattern resourceRegex, Responder responder){
+            responders.add(responder);
+            resourceRegexs.add(resourceRegex);
+            if (methods.containsKey(method))
+                methods.get(method).put(resourceRegex, responder);
+            else {
+                HashMap<Pattern, Responder> responders = new HashMap<>();
+                responders.put(resourceRegex, responder);
+                methods.put(method, responders);
+            }
+        }
 
-    public void registerResponder(String method, String resourceRegex, Responder responder) {
-        responders.add(responder);
-        resourceRegexs.add(resourceRegex);
-        if (methods.containsKey(method))
-            methods.get(method).put(resourceRegex, responder);
-        else {
-            Map<String, Responder> responders = new HashMap<String, Responder>();
-            responders.put(resourceRegex, responder);
-            methods.put(method, responders);
+        public Responder getResponder () {
+            return responder;
         }
     }
-
-    public Responder getResponder() {
-        return responder;
-    }
-}

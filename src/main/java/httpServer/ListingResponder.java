@@ -35,21 +35,29 @@ public class ListingResponder implements Responder {
 
     public byte[] getListings() {
         File directory;
-        String p = "";
-        if (String.valueOf(request.get("resource")).contains("img")) {
-            directory = new File(root + "/img");
-            p = "/img";
-        } else
+        String parent = "";
+        String child = "";
+        String target = String.valueOf(request.get("resource"));
+        String[] subTargets = target.split("/");
+        int targets = subTargets.length;
+        if (targets < 3) {
+            parent = "/" + subTargets[1];
             directory = new File(root);
+        } else {
+            for (int i = 2; i < targets; i++) {
+                child = "/" + child + subTargets[i];
+            }
+            directory = new File(root + "/" + child);
+        }
+
         File[] files = directory.listFiles();
         String bodyMsg = "<ul>";
         for (File file : files) {
             if (file.isDirectory()) {
-                String pd = "/listing";
-                bodyMsg = bodyMsg + "<li><a href=\"" + pd + "/" + file.getName() + "\">" + file.getName() + "</a></li>";
+                bodyMsg = bodyMsg + "<li><a href=\"" + parent + "/" + file.getName() + "\">" + file.getName() + "</a></li>";
             }
             else
-                bodyMsg = bodyMsg + "<li><a href=\"" + p + "/" + file.getName() + "\">" + file.getName() + "</a></li>";
+                bodyMsg = bodyMsg + "<li><a href=\"" + child + "/" + file.getName() + "\">" + file.getName() + "</a></li>";
         }
         bodyMsg = bodyMsg + "</ul>";
         body = bodyMsg.getBytes();

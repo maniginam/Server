@@ -25,8 +25,8 @@ public class FormsTest {
         int port = 1986;
         helper = new HttpTestHelper(port);
         router = new Router();
-        Server.registerResponders(router, builder, helper.root);
         builder = new HttpResponseBuilder();
+        Server.registerResponders(router, builder, helper.root);
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(port, connectionFactory);
     }

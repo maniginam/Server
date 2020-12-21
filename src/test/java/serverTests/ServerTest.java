@@ -8,8 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerTest {
     private TestHelper helper;
@@ -105,6 +106,37 @@ public class ServerTest {
         String result = Server.message;
 
         assertEquals(message, result);
+    }
+
+    @Test
+    public void regex() {
+        Pattern fileRegEx = Pattern.compile("\\..{3,4}$");
+        Pattern listRegEx = Pattern.compile("\\w[^(ping)|(form)]+");
+        Pattern pingRegEx = Pattern.compile("ping");
+        Pattern formRegEx = Pattern.compile("form\\?+");
+        Pattern postFormRegEx = Pattern.compile("form$");
+
+        assertTrue(fileRegEx.matcher("/hello.html").find());
+        assertTrue(fileRegEx.matcher("/hello/helloagain.jpg").find());
+        assertFalse(fileRegEx.matcher("/hello.hl").find());
+        assertFalse(fileRegEx.matcher("/hello").find());
+
+        assertTrue(listRegEx.matcher("/hello").find());
+        assertTrue(listRegEx.matcher("/hello/helloagain").find());
+//        assertFalse(listRegEx.matcher("/hello.hl").find());
+        assertFalse(listRegEx.matcher("/ping").find());
+        assertFalse(listRegEx.matcher("/form").find());
+
+        assertTrue(pingRegEx.matcher("/ping").find());
+        assertFalse(pingRegEx.matcher("/hello").find());
+
+        assertTrue(formRegEx.matcher("/form?").find());
+        assertFalse(formRegEx.matcher("/form").find());
+
+        assertTrue(postFormRegEx.matcher("/form").find());
+        assertFalse(postFormRegEx.matcher("/form?").find());
+
+
     }
 
 
