@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface Responder {
-    byte[] respond(Map<String, Object> request, ResponseBuilder builder) throws IOException, ExceptionInfo, InterruptedException;
+    Map<String, Object> respond(Map<String, Object> request) throws IOException, ExceptionInfo, InterruptedException;
 }

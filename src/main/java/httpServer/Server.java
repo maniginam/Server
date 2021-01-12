@@ -1,7 +1,6 @@
 package httpServer;
 
 import server.ExceptionInfo;
-import server.ResponseBuilder;
 import server.Router;
 import server.SocketHost;
 
@@ -15,7 +14,10 @@ public class Server {
     public static String message;
     private static int port;
     private static String root;
-    private static String serverName = "Gina's Http Server";
+    public static String serverName = "Gina's Http Server";
+    private static Router router;
+    private static SocketHost host;
+    private static Map<String, Object> serverMap;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Map<String, String> argMap = makeArgMap(args);
@@ -30,35 +32,45 @@ public class Server {
         } else {
             setConfigMessage(argMap);
             System.out.println(message);
-            startServer();
         }
+        startServer(port, root);
     }
 
-
-    private static void startServer() throws IOException, InterruptedException {
-        Router router = new Router();
-        HttpResponseBuilder builder = new HttpResponseBuilder();
-        registerResponders(router, builder, root);
-        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(router, builder);
-        SocketHost host = new SocketHost(port, connectionFactory);
+    public static Map<String, Object> startServer(int port, String root) throws IOException, InterruptedException {
+        serverMap = new HashMap<>();
+        router = new Router();
+        registerResponders(router, root);
+        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(router);
+        host = new SocketHost(port, connectionFactory);
+        serverMap.put("router", router);
+        serverMap.put("host", host);
         host.start();
         host.join();
+        // TODO: 1/12/21 command query violation with servermap.  sepearate serverMap from here.
+        return serverMap;
     }
 
-    public static void registerResponders(Router router, ResponseBuilder builder, String root) {
+    public static Map<String, Object> getServerMap() {
+        return serverMap;
+    }
+
+    public static SocketHost getHost() {
+        return host;
+    }
+
+    public static void registerResponders(Router router, String root) {
         ExceptionInfo.serverName = serverName;
-        ExceptionInfo.builder = builder;
         Pattern fileRegEx = Pattern.compile("\\..{3,4}$");
         Pattern listRegEx = Pattern.compile("/listing+(\\/\\w)*");
         Pattern pingRegEx = Pattern.compile("ping{1}(\\/\\d)*");
-        Pattern formRegEx = Pattern.compile("form\\?+");
-        Pattern postFormRegEx = Pattern.compile("form$");
-
-        router.registerResponder("GET", fileRegEx, new FileResponder(serverName, root));
-        router.registerResponder("GET", listRegEx, new ListingResponder(serverName, root));
-        router.registerResponder("GET", pingRegEx, new PingResponder(serverName));
-        router.registerResponder("GET", formRegEx, new FormResponder(serverName));
-        router.registerResponder("POST", postFormRegEx, new MultiPartResponder(serverName));
+        Pattern formRegEx = Pattern.compile("^\\/form\\?+");
+        Pattern postFormRegEx = Pattern.compile("^\\/form$");
+// COMPLETE TODO: 1/12/21 responders should not need serverName; only responseBuilder
+        router.registerResponder("GET", fileRegEx, new FileResponder(root));
+        router.registerResponder("GET", listRegEx, new ListingResponder(root));
+        router.registerResponder("GET", pingRegEx, new PingResponder());
+        router.registerResponder("GET", formRegEx, new FormResponder());
+        router.registerResponder("POST", postFormRegEx, new MultiPartResponder());
     }
 
     private static Map<String, String> makeArgMap(String[] args) {
@@ -95,7 +107,7 @@ public class Server {
         if (invalidArg != null)
             message = "Invalid option: " + invalidArg;
         else {
-            String name = "Example http.Server\r\n";
+            String name = serverName + "\r\n";
             String portLine = "Running on port: " + port + ".\r\n";
             String filesLine = "Serving files from: " + root;
             message = name + portLine + filesLine;

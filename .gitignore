@@ -4,5 +4,6 @@
 .idea
 target
 out
+*.jpg
 
 

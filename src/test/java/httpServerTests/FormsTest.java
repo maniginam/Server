@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import server.*;
 
 import java.io.*;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,14 +27,14 @@ public class FormsTest {
         helper = new HttpTestHelper(port);
         router = new Router();
         builder = new HttpResponseBuilder();
-        Server.registerResponders(router, builder, helper.root);
+        Server.registerResponders(router, helper.root);
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(port, connectionFactory);
     }
 
     @AfterEach
     private void tearDown() throws Exception {
-        host.stop();
+        host.end();
         if (helper.getSocket() != null)
             helper.getSocket().close();
     }
@@ -50,12 +51,12 @@ public class FormsTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
-        byte[] result = builder.getResponse();
-        String msg = helper.readResponseBodyResult(result);
+        Map<String, Object> result = router.getResponseMap();
+        String msg = helper.readResponseBodyResult((byte[]) result.get("body"));
 
         assertTrue(connection.getRouter().getResponder() instanceof FormResponder);
-        assertTrue(msg.contains("HTTP/1.1 200 OK"));
-        assertTrue(msg.contains("Content-Type: text/html"));
+        assertTrue(result.containsValue(200));
+        assertTrue(result.containsValue("text/html"));
         assertTrue(msg.contains("<h2>GET Form</h2>"));
         assertTrue(msg.contains("<li>rex: 3</li>"));
         assertTrue(msg.contains("<li>leo: 1</li>"));

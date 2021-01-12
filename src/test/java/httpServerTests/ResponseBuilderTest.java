@@ -1,41 +1,30 @@
 package httpServerTests;
 
-import httpServer.FileResponder;
 import httpServer.HttpResponseBuilder;
-import httpServer.RequestParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.ExceptionInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResponseBuilderTest {
     private HttpTestHelper helper;
-    private RequestParser parser;
-    private FileResponder responder;
-    private Map<String, Object> requestMap;
     private HttpResponseBuilder builder;
-    private byte[] response;
     private Map<String, Object> responseMap;
 
     @BeforeEach
     public void setup() throws IOException {
         helper = new HttpTestHelper(1003);
-        requestMap = new HashMap<String, Object>();
     }
 
     @Test
-    public void buildBlankResourceResponse() throws IOException, ExceptionInfo, InterruptedException {
-        String request = "GET HTTP/1.1\r\n\r\n";
-        String root = helper.root;
-        parser = helper.getParser(request);
+    public void buildBlankResourceResponse() throws IOException {
         builder = new HttpResponseBuilder();
-        responder = new FileResponder("Leo's Server", root);
         responseMap = new HashMap<>();
 
         helper.setResource("/index.html");
@@ -49,7 +38,6 @@ public class ResponseBuilderTest {
         String message = helper.readResponseBodyResult(result);
 
         ByteArrayOutputStream target = new ByteArrayOutputStream();
-        target = new ByteArrayOutputStream();
         target.write(("HTTP/1.1 200 OK\r\n" +
                 "Server: Leo's Server\r\n" +
                 "Content-Length: " + helper.getContentLength() + "\r\n" +
@@ -60,10 +48,6 @@ public class ResponseBuilderTest {
         assertTrue(message.contains("Server: Leo's Server"));
         assertTrue(message.contains("Content-Length: " + helper.getContentLength()));
         assertTrue(message.contains("Content-Type: text/html"));
-
-        assertArrayEquals(helper.getBody(), builder.getBody());
         assertArrayEquals(target.toByteArray(), result);
-
-
     }
 }

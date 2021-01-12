@@ -11,7 +11,7 @@ public class ExceptionInfo extends Throwable {
     public static ResponseBuilder builder;
     private ExceptionInfoResponder responder;
     private final Map<String, Object> request;
-    private final byte[] response;
+    private final Map<String, Object> response;
     private String message;
 
     public ExceptionInfo(String message) throws IOException, ExceptionInfo {
@@ -19,11 +19,11 @@ public class ExceptionInfo extends Throwable {
         this.setMessage(message);
         request = new HashMap<String, Object>();
         request.put("message", message);
-        responder = new ExceptionInfoResponder(serverName);
-        response = responder.respond(request, builder);
+        responder = new ExceptionInfoResponder();
+        response = responder.respond(request);
     }
 
-    public byte[] getResponse() {
+    public Map<String, Object> getResponse() {
         return response;
     }
 

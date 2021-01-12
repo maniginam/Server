@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import server.*;
 
 import java.io.*;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,7 +26,7 @@ public class MultiPartTest {
         int port = 1988;
         helper = new HttpTestHelper(port);
         router = new Router();
-        Server.registerResponders(router, builder, helper.root);
+        Server.registerResponders(router, helper.root);
         builder = new HttpResponseBuilder();
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(port, connectionFactory);
@@ -33,7 +34,7 @@ public class MultiPartTest {
 
     @AfterEach
     private void tearDown() throws Exception {
-        host.stop();
+        host.end();
         if (helper.getSocket() != null)
             helper.getSocket().close();
     }
@@ -66,13 +67,12 @@ public class MultiPartTest {
         buffed.read();
 
         connection = host.getConnections().get(0);
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getTargetResonse();
+        Map<String, Object> result = router.getResponseMap();
+        String responseBodyMsg = helper.readResponseBodyResult((byte[]) result.get("body"));
 
         assertTrue(connection.getRouter().getResponder() instanceof MultiPartResponder);
-        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
-        assertTrue(responseBodyMsg.contains("Content-Type: application/octet-stream"));
+        assertTrue(result.containsValue(200));
+        assertTrue(result.containsValue("application/octet-stream"));
         assertTrue(responseBodyMsg.contains("<h2>POST Form</h2>"));
         assertTrue(responseBodyMsg.contains("<li>file name: BruslyDog.jpeg</li>"));
         assertTrue(responseBodyMsg.contains("<li>file size: 92990</li>"));

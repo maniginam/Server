@@ -178,7 +178,7 @@ class TestConnectionFactory implements ConnectionFactory {
 class TestConnection extends HttpConnection {
 
     public TestConnection(SocketHost host, Socket socket, Router router, HttpResponseBuilder builder) throws IOException {
-        super(host, socket, router, builder);
+        super(host, socket, router);
     }
 }
 

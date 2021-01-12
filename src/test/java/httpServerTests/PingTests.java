@@ -1,16 +1,22 @@
 package httpServerTests;
 
-import httpServer.*;
+import httpServer.HttpResponseBuilder;
+import httpServer.PingResponder;
+import httpServer.Server;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.*;
+import server.Connection;
+import server.Responder;
+import server.Router;
+import server.SocketHost;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PingTests {
 
@@ -28,7 +34,7 @@ public class PingTests {
         int port = 7115;
         helper = new HttpTestHelper(port);
         router = new Router();
-        Server.registerResponders(router, builder, helper.root);
+        Server.registerResponders(router, helper.root);
         builder = new HttpResponseBuilder();
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(port, connectionFactory);
@@ -36,7 +42,7 @@ public class PingTests {
 
     @AfterEach
     private void tearDown() throws Exception {
-        host.stop();
+        host.end();
         if (helper.getSocket() != null)
             helper.getSocket().close();
     }
@@ -54,13 +60,13 @@ public class PingTests {
 
         connection = host.getConnections().get(0);
 
-
-        String responseBody = helper.readResponseBodyResult(builder.getBody());
+        Map<String, Object> result = router.getResponseMap();
+        String responseMsg = helper.readResponseBodyResult((byte[]) result.get("body"));
 
         assertTrue(connection.getRouter().getResponder() instanceof PingResponder);
-        assertTrue(responseBody.contains("<h2>Ping</h2>"));
-        assertTrue(responseBody.contains("<li>start time: "));
-        assertTrue(responseBody.contains("<li>end time: "));
+        assertTrue(responseMsg.contains("<h2>Ping</h2>"));
+        assertTrue(responseMsg.contains("<li>start time: "));
+        assertTrue(responseMsg.contains("<li>end time: "));
     }
 
     @Test
@@ -76,13 +82,14 @@ public class PingTests {
 
         connection = host.getConnections().get(0);
 
+        Map<String, Object> result = router.getResponseMap();
+        String responseMsg = helper.readResponseBodyResult((byte[]) result.get("body"));
 
-        String responseBody = helper.readResponseBodyResult(builder.getBody());
         assertTrue(connection.getRouter().getResponder() instanceof PingResponder);
-        assertTrue(responseBody.contains("<h2>Ping</h2>"));
-        assertTrue(responseBody.contains("<li>start time: "));
-        assertTrue(responseBody.contains("<li>end time: "));
-        assertTrue(responseBody.contains("<li>sleep seconds: 1</li>"));
+        assertTrue(responseMsg.contains("<h2>Ping</h2>"));
+        assertTrue(responseMsg.contains("<li>start time: "));
+        assertTrue(responseMsg.contains("<li>end time: "));
+        assertTrue(responseMsg.contains("<li>sleep seconds: 1</li>"));
     }
 
     @Test
@@ -98,11 +105,13 @@ public class PingTests {
         output.write(request2.getBytes());
         buffed.read();
 
-        String response1 = helper.readResponseBodyResult(builder.getBody());
+        Map<String, Object> result1 = router.getResponseMap();
+        String response1 = helper.readResponseBodyResult((byte[]) result1.get("body"));
         Responder responder1 = router.getResponder();
 
         Thread.sleep(100);
-        String response2 = helper.readResponseBodyResult(builder.getBody());
+        Map<String, Object> result2 = router.getResponseMap();
+        String response2 = helper.readResponseBodyResult((byte[]) result2.get("body"));
         Responder responder2 = router.getResponder();
 
         assertTrue(responder1 instanceof PingResponder);
@@ -116,6 +125,5 @@ public class PingTests {
         assertTrue(response2.contains("<li>start time: "));
         assertTrue(response2.contains("<li>end time: "));
         assertTrue(response2.contains("<li>sleep seconds: 0</li>"));
-
     }
 }

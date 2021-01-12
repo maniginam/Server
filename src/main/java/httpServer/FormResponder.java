@@ -1,7 +1,6 @@
 package httpServer;
 
 import server.Responder;
-import server.ResponseBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,25 +10,22 @@ public class FormResponder implements Responder {
     private final Map<String, Object> responseMap;
     private Map<String, Object> request;
     private byte[] body;
-    private byte[] response;
 
-    public FormResponder(String serverName) {
+    public FormResponder() {
         responseMap = new HashMap<>();
-        responseMap.put("Server", serverName);
         responseMap.put("statusCode", 200);
         responseMap.put("Content-Type", "text/html");
     }
 
     @Override
-    public byte[] respond(Map<String, Object> request, ResponseBuilder builder) throws IOException {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException {
         this.request = request;
-        responseMap.put("body", makeMessage());
-        responseMap.put("Content-Length", String.valueOf(body.length));
-        response = builder.buildResponse(responseMap);
-        return response;
+        responseMap.put("body", addFormMsgToRspMap());
+        responseMap.put("Content-Length", getBodySize());
+        return responseMap;
     }
 
-    public byte[] makeMessage() {
+    public byte[] addFormMsgToRspMap() {
         String[] entries = String.valueOf(request.get("resource")).split("[?=&]");
         String bodyMsg = "<h2>GET Form</h2>";
         for (int i = 1; i < entries.length; i= i+2) {
@@ -39,5 +35,11 @@ public class FormResponder implements Responder {
         }
         body = bodyMsg.getBytes();
         return body;
+    }
+
+    private int getBodySize() {
+        if (body == null)
+            body = addFormMsgToRspMap();
+        return body.length;
     }
 }

@@ -30,7 +30,8 @@ public class HttpResponseBuilder implements ResponseBuilder {
         return response.toByteArray();
     }
 
-    private void writeStatusLIne() throws IOException {
+    private void writeStatusLIne() {
+//        System.out.println("HttpRESPONSEBUILDER responseMap = " + responseMap);
         int statusCode = (int) responseMap.get("statusCode");
         if (statusCode == 200)
             statusLine = "HTTP/1.1 " + statusCode + " OK\r\n";
@@ -39,7 +40,7 @@ public class HttpResponseBuilder implements ResponseBuilder {
         responseMsg = statusLine;
     }
 
-    private void writeHeaders() throws IOException {
+    private void writeHeaders() {
         headers = "";
         for (String key : responseMap.keySet()) {
             if(key != "body" && key != "statusCode")
@@ -49,23 +50,11 @@ public class HttpResponseBuilder implements ResponseBuilder {
         responseMsg = responseMsg + "\r\n";
     }
 
-    private void writeBody() throws IOException {
+    private void writeBody() {
         body = (byte[]) responseMap.get("body");
     }
 
     public byte[] getResponse() {
         return response.toByteArray();
-    }
-
-    public String getStatusLine() {
-        return statusLine;
-    }
-
-    public String getHeaders() {
-        return headers;
-    }
-
-    public byte[] getBody() {
-        return body;
     }
 }

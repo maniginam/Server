@@ -50,7 +50,7 @@ public class SocketHost {
         }
     }
 
-    public void stop() throws IOException, InterruptedException {
+    public void end() throws IOException, InterruptedException {
         while (running) {
             running = false;
             for (Connection connection : connections) {

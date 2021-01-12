@@ -1,13 +1,15 @@
 package httpServer;
 
-import server.*;
+import server.Connection;
+import server.ExceptionInfo;
+import server.Router;
+import server.SocketHost;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpConnection implements Connection {
@@ -18,18 +20,14 @@ public class HttpConnection implements Connection {
     private RequestParser parser;
     private HttpResponseBuilder builder;
     private OutputStream output;
-    private Map<String, Object> responseMap;
-    private Thread routerThread;
-    private List<Thread> routes;
     private byte[] response;
 
-    public HttpConnection(SocketHost host, Socket socket, Router router, HttpResponseBuilder builder) throws IOException {
+    public HttpConnection(SocketHost host, Socket socket, Router router) throws IOException {
         this.host = host;
         this.socket = socket;
         this.router = router;
-        this.builder = builder;
+        builder = new HttpResponseBuilder();
         output = socket.getOutputStream();
-        routes = new ArrayList<>();
     }
 
     public void start() {
@@ -39,6 +37,8 @@ public class HttpConnection implements Connection {
 
     @Override
     public void run() {
+        // COMPLETE TODO: 1/12/21 This guy should be adding the name of server to give to responsebuilder that he creates (not the responders)
+        Map<String, Object> responseMap = new HashMap<>();
         try {
             BufferedInputStream buffedInput = new BufferedInputStream(socket.getInputStream());
 
@@ -47,10 +47,13 @@ public class HttpConnection implements Connection {
                     parser = new RequestParser(buffedInput);
                     try {
                         Map<String, Object> request = parser.parse();
-                        response = router.route(request, builder);
+                        responseMap = router.route(request);
                     } catch (ExceptionInfo e) {
-                        response = e.getResponse();
+                        responseMap = e.getResponse();
                     }
+
+                    responseMap.put("Server", "Gina's Http Server");
+                    response = builder.buildResponse(responseMap);
                     if (response != null) {
                         send(response);
                     }

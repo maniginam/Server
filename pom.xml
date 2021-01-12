@@ -10,8 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Gina's Server</name>
-    <!-- FIXME change it to the project's website -->
-    <url>http://www.example.com</url>
+    <url>github.com/maniginam/server</url>
 
     <properties>
         <src.dir>src/main/java</src.dir>

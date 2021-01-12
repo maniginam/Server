@@ -13,98 +13,91 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerTest {
     private TestHelper helper;
+    private Map<String, String> args;
 
     @BeforeEach
     public void setup() throws IOException {
         helper = new TestHelper(1003);
+        args = new HashMap<>();
     }
 
     @Test
     public void submitInvalidEntry() throws IOException {
-        String message = "Invalid option: Rex";
-        Map<String, String> args = new HashMap<>();
+        String target = "Invalid option: Rex";
         args.put("Rex", null);
         Server.setConfigMessage(args);
         String result = Server.message;
-        assertEquals(message, result);
+        assertEquals(target, result);
     }
 
     @Test
     public void submitH() {
-        String p = "  -p     Specify the port.  Default is 80.";
-        String r = "  -r     Specify the root directory.  Default is the current working directory.";
-        String h = "  -h     Print this help message";
-        String x = "  -x     Print the startup configuration without starting the server";
-        String message = p + r + h + x;
+        String target = "  -p     Specify the port.  Default is 80." +
+                "  -r     Specify the root directory.  Default is the current working directory." +
+                "  -h     Print this help message" +
+                "  -x     Print the startup configuration without starting the server";
 
         Server.setUsage();
         String result = Server.message;
 
-        assertEquals(message, result);
+        assertEquals(target, result);
     }
 
     @Test
     public void submitXEntry() throws IOException, InterruptedException {
-        String name = "Example http.Server\r\n";
-        String portLine = "Running on port: 80.\r\n";
-        String filesLine = "Serving files from: " + new File(".").getCanonicalPath();
-        String message = name + portLine + filesLine;
-        Map<String, String> args = new HashMap<>();
+        String target = Server.serverName + "\r\n" +
+                "Running on port: 80.\r\n" +
+                "Serving files from: " + new File(".").getCanonicalPath();
         args.put("-x", null);
 
         Server.setConfigMessage(args);
         String result = Server.message;
 
-        assertEquals(message, result);
+        assertEquals(target, result);
     }
 
     @Test
     public void submitPEntryWithX() throws Exception {
-        String name = "Example http.Server\r\n";
-        String portLine = "Running on port: 3141.\r\n";
-        String filesLine = "Serving files from: " + new File(".").getCanonicalPath();
-        String message = name + portLine + filesLine;
-        Map<String, String> args = new HashMap<>();
+        String target = Server.serverName + "\r\n" +
+                "Running on port: 3141.\r\n" +
+                "Serving files from: " + new File(".").getCanonicalPath();
         args.put("-x", null);
         args.put("-p", "3141");
 
         Server.setConfigMessage(args);
         String result = Server.message;
 
-        assertEquals(message, result);
+        assertEquals(target, result);
 
     }
 
     @Test
     public void submitREntry() throws Exception {
-        String name = "Example http.Server\r\n";
-        String portLine = "Running on port: 80.\r\n";
-        String filesLine = "Serving files from: " + new File(".").getCanonicalPath() + "/testroot";
-        String message = name + portLine + filesLine;
+        String target = Server.serverName + "\r\n" +
+                "Running on port: 80.\r\n" +
+                "Serving files from: " + new File(".").getCanonicalPath() + "/testroot";
 
-        Map<String, String> args = new HashMap<>();
         args.put("-x", null);
         args.put("-r", "testroot");
 
         Server.setConfigMessage(args);
         String result = Server.message;
 
-        assertEquals(message, result);
+        assertEquals(target, result);
     }
 
     @Test
     public void messageOnlyFromPEntryWithNOX() throws Exception {
-        String name = "Example http.Server\r\n";
-        String portLine = "Running on port: 3141.\r\n";
-        String filesLine = "Serving files from: " + new File(".").getCanonicalPath();
-        String message = name + portLine + filesLine;
-        Map<String, String> args = new HashMap<>();
+        String target = Server.serverName + "\r\n" +
+                "Running on port: 3141.\r\n" +
+                "Serving files from: " + new File(".").getCanonicalPath();
+        
         args.put("-p", "3141");
 
         Server.setConfigMessage(args);
         String result = Server.message;
 
-        assertEquals(message, result);
+        assertEquals(target, result);
     }
 
 

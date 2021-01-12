@@ -1,7 +1,6 @@
 package httpServer;
 
 import server.Responder;
-import server.ResponseBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,31 +10,26 @@ public class MultiPartResponder implements Responder {
     private final Map<String, Object> responseMap;
     private Map<String, Object> request;
     private byte[] body;
-    private String type;
-    private byte[] response;
 
-    public MultiPartResponder(String serverName) {
+    public MultiPartResponder() {
         responseMap = new HashMap<>();
-        responseMap.put("Server", serverName);
         responseMap.put("statusCode", 200);
-        type = "application/octet-stream";
-        responseMap.put("Content-Type", type);
+        responseMap.put("Content-Type", "application/octet-stream");
     }
 
     @Override
-    public byte[] respond(Map<String, Object> request, ResponseBuilder builder) throws IOException {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException {
         this.request = request;
-        responseMap.put("body", makeMessage());
+        responseMap.put("body", makePostMessage());
         responseMap.put("Content-Length", String.valueOf(body.length));
-        response = builder.buildResponse(responseMap);
-        return response;
+        return responseMap;
     }
 
-    public byte[] makeMessage() {
+    public byte[] makePostMessage() {
         String bodyMsg = "<h2>POST Form</h2>" +
                 "<li>file name: " + String.valueOf(request.get("fileName")).replace("\"", "") + "</li>" +
                 "<li>file size: " + request.get("fileSize") + "</li>" +
-                "<li>content type: " + type + "</li>";
+                "<li>content type: " + request.get("Content-Type") + "</li>";
         body = bodyMsg.getBytes();
         return body;
     }

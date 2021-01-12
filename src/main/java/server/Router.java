@@ -15,7 +15,7 @@ public class Router {
     private Pattern responderPointer;
     private String method;
     private String resource;
-    private byte[] response;
+    private Map<String, Object> responseMap;
     private Map<String, Object> request;
     private List<Responder> responders;
 
@@ -25,8 +25,9 @@ public class Router {
         responders = new ArrayList<>();
     }
 
-    public byte[] route(Map<String, Object> request, ResponseBuilder builder) throws IOException, ExceptionInfo, InterruptedException {
+    public Map<String, Object> route(Map<String, Object> request) throws IOException, ExceptionInfo, InterruptedException {
         this.request = request;
+//        System.out.println("ROUTER request = " + request);
         if (request != null) {
             method = String.valueOf(request.get("method"));
             resource = String.valueOf(request.get("resource"));
@@ -39,25 +40,29 @@ public class Router {
                 }
             }
             if (responder != null)
-                response = responder.respond(request, builder);
+                responseMap = responder.respond(request);
             else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
-        return response;
+        return responseMap;
     }
 
-        public void registerResponder (String method, Pattern resourceRegex, Responder responder){
-            responders.add(responder);
-            resourceRegexs.add(resourceRegex);
-            if (methods.containsKey(method))
-                methods.get(method).put(resourceRegex, responder);
-            else {
-                HashMap<Pattern, Responder> responders = new HashMap<>();
-                responders.put(resourceRegex, responder);
-                methods.put(method, responders);
-            }
-        }
-
-        public Responder getResponder () {
-            return responder;
+    public void registerResponder(String method, Pattern resourceRegex, Responder responder) {
+        responders.add(responder);
+        resourceRegexs.add(resourceRegex);
+        if (methods.containsKey(method))
+            methods.get(method).put(resourceRegex, responder);
+        else {
+            HashMap<Pattern, Responder> responders = new HashMap<>();
+            responders.put(resourceRegex, responder);
+            methods.put(method, responders);
         }
     }
+
+    public Responder getResponder() {
+        return responder;
+    }
+
+    public Map<String, Object> getResponseMap() {
+        return responseMap;
+    }
+}

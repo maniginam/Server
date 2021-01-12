@@ -1,8 +1,6 @@
 package httpServer;
 
-import server.ExceptionInfo;
 import server.Responder;
-import server.ResponseBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,51 +11,51 @@ import java.util.Map;
 
 public class FileResponder implements Responder {
     private final String root;
-    private final Map<String, String> types;
-    Map<String, Object> responseMap;
+    // COMPLETE TODO: 1/12/21 Types should be static. Don't create the map in constructor for every file responder.
     private byte[] body;
     public Map<String, Object> request;
-    private String type;
-    private byte[] response;
+    Map<String, Object> responseMap;
+    private final Map<String, String> types = new HashMap<String, String>() {{
+        put("html", "text/html");
+        put("pdf", "application/pdf");
+        put("jpg", "image/jpeg");
+        put("jpeg", "image/jpeg");
+        put("png", "image/png");
+    }};
 
-    public FileResponder(String serverName, String root) {
+    public FileResponder( String root) {
         this.root = root;
         responseMap = new HashMap<>();
-        responseMap.put("Server", serverName);
-        types = new HashMap<>();
-        types.put("html", "text/html");
-        types.put("pdf", "application/pdf");
-        types.put("jpg", "image/jpeg");
-        types.put("jpeg", "image/jpeg");
-        types.put("png", "image/png");
+
     }
 
-    public byte[] respond(Map<String, Object> request, ResponseBuilder builder) throws IOException, ExceptionInfo {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException {
         this.request = request;
-        type = determineFileType();
+        String type = determineFileType();
         responseMap.put("body", readFile());
         responseMap.put("statusCode", 200);
         responseMap.put("Content-Type", type);
-        responseMap.put("Content-Length", String.valueOf(body.length));
+        responseMap.put("Content-Length", body.length);
 
-        response = builder.buildResponse(responseMap);
-        return response;
+        return responseMap;
     }
 
     private String determineFileType() {
         String resource = String.valueOf(request.get("resource"));
-        String fileType = resource.split("\\.")[resource.split("\\.").length - 1];
+        final String[] split = resource.split("\\.");
+        String fileType = split[split.length - 1];
         return types.get(fileType);
     }
 
-    public byte[] readFile() throws ExceptionInfo, IOException {
+    public byte[] readFile() {
         String resource = String.valueOf(request.get("resource"));
+        if (resource.contains("favicon.ico"))
+            resource = "/favicon.ico";
         Path path = Paths.get((root + resource));
         try {
             body = Files.readAllBytes(path);
         } catch (IOException e) {
-            // TODO: 12/15/20 This feels ugly--ask about this
-            throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
+            e.printStackTrace();
         }
         return body;
     }

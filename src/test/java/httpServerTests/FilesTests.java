@@ -9,6 +9,7 @@ import server.*;
 
 
 import java.io.*;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,15 +27,15 @@ public class FilesTests {
     public void setup() throws IOException {
         helper = new HttpTestHelper(1003);
         router = new Router();
-        Server.registerResponders(router, builder, helper.root);
         builder = new HttpResponseBuilder();
+        Server.registerResponders(router, helper.root);
         connectionFactory = new TestConnectionFactory(router, builder);
         host = new SocketHost(1003, connectionFactory);
     }
 
     @AfterEach
     private void tearDown() throws Exception {
-        host.stop();
+        host.end();
         if (helper.getSocket() != null)
             helper.getSocket().close();
     }
@@ -51,17 +52,16 @@ public class FilesTests {
         output.write(request.getBytes());
         buffed.read();
 
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getTargetResonse();
+        Map<String, Object> result = router.getResponseMap();
+        String responseBodyMsg = helper.readResponseBodyResult((byte[]) result.get("body"));
 
         if (router.getResponder() instanceof ListingResponder)
             assertTrue(router.getResponder() instanceof ListingResponder);
         else System.out.println("NOT LISTING RESPONDER");
-        assertArrayEquals(target.toByteArray(), result);
-        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
-        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
-        assertTrue(responseBodyMsg.contains("Content-Type: text/html"));
+        assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
+        assertTrue(result.containsValue(200));
+        assertTrue(result.containsValue(String.valueOf(helper.getContentLength())));
+        assertTrue(result.containsValue("text/html"));
         Assertions.assertTrue(responseBodyMsg.contains("<ul>"));
         Assertions.assertTrue(responseBodyMsg.contains("<li><a href=\"/index.html\">index.html</a></li>"));
         Assertions.assertTrue(responseBodyMsg.contains("<li><a href=\"/hello.pdf\">hello.pdf</a></li>"));
@@ -80,17 +80,16 @@ public class FilesTests {
         output.write(request.getBytes());
         buffed.read();
 
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getTargetResonse();
+        Map<String, Object> result = router.getResponseMap();
+        String responseBodyMsg = helper.readResponseBodyResult((byte[]) result.get("body"));
 
         if (router.getResponder() instanceof ListingResponder)
             assertTrue(router.getResponder() instanceof ListingResponder);
         else System.out.println("NOT LISTING RESPONDER");
-        assertArrayEquals(target.toByteArray(), result);
-        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
-        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
-        assertTrue(responseBodyMsg.contains("Content-Type: text/html"));
+        assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
+        assertTrue(result.containsValue(200));
+        assertTrue(result.containsValue(String.valueOf(helper.getContentLength())));
+        assertTrue(result.containsValue("text/html"));
         Assertions.assertTrue(responseBodyMsg.contains("<ul>"));
         Assertions.assertTrue(responseBodyMsg.contains("<li><a href=\"/img/BruslyDog.jpeg\">BruslyDog.jpeg</a></li>"));
         Assertions.assertTrue(responseBodyMsg.contains("<li><a href=\"/img/decepticon.png\">decepticon.png</a></li>"));
@@ -109,16 +108,14 @@ public class FilesTests {
         output.write(request.getBytes());
         buffed.read();
 
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getTargetResonse();
+        Map<String, Object> result = router.getResponseMap();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
-        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
-        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
-        assertTrue(responseBodyMsg.contains("Content-Type: image/jpeg"));
-        assertArrayEquals(target.toByteArray(), result);
+        assertTrue(result.containsValue(200));
+        assertTrue(result.containsValue("Gina's Http Server"));
+        assertTrue(result.containsValue(helper.getContentLength()));
+        assertTrue(result.containsValue("image/jpeg"));
+        assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
     }
 
     @Test
@@ -133,16 +130,14 @@ public class FilesTests {
         output.write(request.getBytes());
         buffed.read();
 
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getTargetResonse();
+        Map<String, Object> result = router.getResponseMap();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
-        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
-        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
-        assertTrue(responseBodyMsg.contains("Content-Type: image/jpeg"));
-        assertArrayEquals(target.toByteArray(), result);
+        assertTrue(result.containsValue(200));
+        assertTrue(result.containsValue("Gina's Http Server"));
+        assertTrue(result.containsValue(helper.getContentLength()));
+        assertTrue(result.containsValue("image/jpeg"));
+        assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
     }
 
     @Test
@@ -157,16 +152,14 @@ public class FilesTests {
         output.write(request.getBytes());
         buffed.read();
 
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getTargetResonse();
+        Map<String, Object> result = router.getResponseMap();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
-        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
-        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
-        assertTrue(responseBodyMsg.contains("Content-Type: image/png"));
-        assertArrayEquals(target.toByteArray(), result);
+        assertTrue(result.containsValue(200));
+        assertTrue(result.containsValue("Gina's Http Server"));
+        assertTrue(result.containsValue(helper.getContentLength()));
+        assertTrue(result.containsValue("image/png"));
+        assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
     }
 
     @Test
@@ -181,15 +174,13 @@ public class FilesTests {
         output.write(request.getBytes());
         buffed.read();
 
-        byte[] result = builder.getResponse();
-        String responseBodyMsg = helper.readResponseBodyResult(result);
-        ByteArrayOutputStream target = helper.getTargetResonse();
+        Map<String, Object> result = router.getResponseMap();
 
         assertTrue(router.getResponder() instanceof FileResponder);
-        assertTrue(responseBodyMsg.contains("HTTP/1.1 200 OK"));
-        assertTrue(responseBodyMsg.contains("Server: Gina's Http Server"));
-        assertTrue(responseBodyMsg.contains("Content-Length: " + helper.getContentLength()));
-        assertTrue(responseBodyMsg.contains("Content-Type: application/pdf"));
-        assertArrayEquals(target.toByteArray(), result);
+        assertTrue(result.containsValue(200));
+        assertTrue(result.containsValue("Gina's Http Server"));
+        assertTrue(result.containsValue(helper.getContentLength()));
+        assertTrue(result.containsValue("application/pdf"));
+        assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
     }
 }

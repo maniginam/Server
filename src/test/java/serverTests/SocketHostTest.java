@@ -36,7 +36,7 @@ public class SocketHostTest {
 
     @AfterEach
     private void tearDown() throws Exception {
-        host.stop();
+        host.end();
         if (socket != null)
             socket.close();
     }
@@ -60,7 +60,7 @@ public class SocketHostTest {
         host.start();
         assertTrue(host.isRunning());
 
-        host.stop();
+        host.end();
         assertFalse(host.isRunning());
     }
 
@@ -82,7 +82,7 @@ public class SocketHostTest {
         assertTrue(host.isAlive());
         connect();
         Thread.sleep(100);
-        host.stop();
+        host.end();
         assertFalse(host.isAlive());
         List<Connection> connections = host.getConnections();
         for (Connection connection : connections) {

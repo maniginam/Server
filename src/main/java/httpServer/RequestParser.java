@@ -26,7 +26,7 @@ public class RequestParser {
         methods.add("GET");
         methods.add("POST");
         isHeaderComplete = false;
-        requestMap = new HashMap<String, Object>();
+        requestMap = new HashMap<>();
     }
 
     public Map<String, Object> parse() throws IOException, ExceptionInfo {

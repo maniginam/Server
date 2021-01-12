@@ -1,7 +1,6 @@
 package httpServer;
 
 import server.Responder;
-import server.ResponseBuilder;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -10,28 +9,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PingResponder implements Responder {
-    private final String serverName;
     private final Map<String, Object> responseMap;
     private Map<String, Object> request;
     private byte[] body;
-    private Map<String, String> header;
-    private byte[] response;
 
-    public PingResponder(String serverName) {
-        this.serverName = serverName;
+    public PingResponder() {
         responseMap = new HashMap<>();
-        responseMap.put("Server", serverName);
         responseMap.put("statusCode", 200);
         responseMap.put("Content-Type", "text/html");
     }
 
     @Override
-    public byte[] respond(Map<String, Object> request, ResponseBuilder builder) throws IOException {
+    public Map<String, Object> respond(Map<String, Object> request) throws IOException {
         this.request = request;
         responseMap.put("body", makeMessage());
         responseMap.put("Content-Length", String.valueOf(body.length));
-        response = builder.buildResponse(responseMap);
-        return response;
+        return responseMap;
     }
 
     public byte[] makeMessage() {
