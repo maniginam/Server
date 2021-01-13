@@ -112,7 +112,6 @@ public class FilesTests {
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertTrue(result.containsValue(200));
-        assertTrue(result.containsValue("Gina's Http Server"));
         assertTrue(result.containsValue(helper.getContentLength()));
         assertTrue(result.containsValue("image/jpeg"));
         assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
@@ -134,7 +133,6 @@ public class FilesTests {
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertTrue(result.containsValue(200));
-        assertTrue(result.containsValue("Gina's Http Server"));
         assertTrue(result.containsValue(helper.getContentLength()));
         assertTrue(result.containsValue("image/jpeg"));
         assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
@@ -156,7 +154,6 @@ public class FilesTests {
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertTrue(result.containsValue(200));
-        assertTrue(result.containsValue("Gina's Http Server"));
         assertTrue(result.containsValue(helper.getContentLength()));
         assertTrue(result.containsValue("image/png"));
         assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));
@@ -178,7 +175,6 @@ public class FilesTests {
 
         assertTrue(router.getResponder() instanceof FileResponder);
         assertTrue(result.containsValue(200));
-        assertTrue(result.containsValue("Gina's Http Server"));
         assertTrue(result.containsValue(helper.getContentLength()));
         assertTrue(result.containsValue("application/pdf"));
         assertArrayEquals(helper.getBody(), (byte[]) result.get("body"));

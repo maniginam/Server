@@ -4,6 +4,7 @@ import server.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 
 public class TestHelper {
     private final int port;
@@ -99,6 +100,11 @@ class TestConnection implements Connection {
 
     @Override
     public Router getRouter() {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getResponseMap() {
         return null;
     }
 

@@ -69,7 +69,7 @@ public class BasicRequestsTest {
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(helper.getBody(), bodyResult);
         assertTrue(responseMapResult.containsValue(200));
-        assertTrue(responseMapResult.containsValue("Gina's Http Server"));
+        assertTrue(connection.getResponseMap().containsValue("Gina's Http Server"));
         assertTrue(responseMapResult.containsValue(helper.getContentLength()));
         assertTrue(responseMapResult.containsValue("text/html"));
         assertTrue(responseBodyMsg.contains("<h1>Hello, World!</h1>"));
@@ -97,7 +97,7 @@ public class BasicRequestsTest {
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(helper.getBody(), bodyResult);
         assertTrue(responseMapResult.containsValue(200));
-        assertTrue(responseMapResult.containsValue("Gina's Http Server"));
+        assertTrue(connection.getResponseMap().containsValue("Gina's Http Server"));
         assertTrue(responseMapResult.containsValue(helper.getContentLength()));
         assertTrue(responseMapResult.containsValue("text/html"));
         assertTrue(responseBodyMsg.contains("<h1>Hello, World!</h1>"));
@@ -124,7 +124,7 @@ public class BasicRequestsTest {
         assertTrue(router.getResponder() instanceof FileResponder);
         assertArrayEquals(helper.getBody(), bodyResult);
         assertTrue(responseMapResult.containsValue(200));
-        assertTrue(responseMapResult.containsValue("Gina's Http Server"));
+        assertTrue(connection.getResponseMap().containsValue("Gina's Http Server"));
         assertTrue(responseMapResult.containsValue(helper.getContentLength()));
         assertTrue(responseMapResult.containsValue("text/html"));
         assertTrue(responseBodyMsg.contains("<h1>Hello, World!</h1>"));

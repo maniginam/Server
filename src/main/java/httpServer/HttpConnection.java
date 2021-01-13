@@ -21,6 +21,7 @@ public class HttpConnection implements Connection {
     private HttpResponseBuilder builder;
     private OutputStream output;
     private byte[] response;
+    private HashMap<String, Object> responseMap;
 
     public HttpConnection(SocketHost host, Socket socket, Router router) throws IOException {
         this.host = host;
@@ -38,7 +39,8 @@ public class HttpConnection implements Connection {
     @Override
     public void run() {
         // COMPLETE TODO: 1/12/21 This guy should be adding the name of server to give to responsebuilder that he creates (not the responders)
-        Map<String, Object> responseMap = new HashMap<>();
+        // TODO: 1/13/21 ASK ABOUT NEW RESPONSEMAP & WHY CLOJURE WON'T PUT 
+        Map<String, Object> routerResponseMap;
         try {
             BufferedInputStream buffedInput = new BufferedInputStream(socket.getInputStream());
 
@@ -47,12 +49,17 @@ public class HttpConnection implements Connection {
                     parser = new RequestParser(buffedInput);
                     try {
                         Map<String, Object> request = parser.parse();
-                        responseMap = router.route(request);
+                        routerResponseMap = router.route(request);
                     } catch (ExceptionInfo e) {
-                        responseMap = e.getResponse();
+                        routerResponseMap = e.getResponse();
                     }
-
+                    responseMap = new HashMap<>();
+                    for (String key : routerResponseMap.keySet())
+                        {
+                        responseMap.put(key, (routerResponseMap.get(key)));
+                    }
                     responseMap.put("Server", "Gina's Http Server");
+
                     response = builder.buildResponse(responseMap);
                     if (response != null) {
                         send(response);
@@ -87,4 +94,7 @@ public class HttpConnection implements Connection {
         return router;
     }
 
+    public Map<String, Object> getResponseMap() {
+        return responseMap;
+    };
 }
