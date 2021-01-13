@@ -1,6 +1,5 @@
 package httpServer;
 
-import server.ExceptionInfo;
 import server.Router;
 import server.SocketHost;
 
@@ -12,14 +11,27 @@ import java.util.regex.Pattern;
 
 public class Server {
     public static String message;
-    private static int port;
+    private static int port = 80;
     private static String root;
+
+    static {
+        try {
+            root = new File(".").getCanonicalPath() + "/serverFiles";
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String serverName = "Gina's Http Server";
-    private static Router router;
+    public static Router router;
     private static SocketHost host;
-    private static Map<String, Object> serverMap;
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        submitArgs(args);
+        startServer(port, root);
+    }
+
+    public static void submitArgs(String[] args) throws IOException {
         Map<String, String> argMap = makeArgMap(args);
         if (argMap.containsKey("-h")) {
             setUsage();
@@ -33,47 +45,9 @@ public class Server {
             setConfigMessage(argMap);
             System.out.println(message);
         }
-        startServer(port, root);
     }
 
-    public static Map<String, Object> startServer(int port, String root) throws IOException, InterruptedException {
-        serverMap = new HashMap<>();
-        router = new Router();
-        registerResponders(router, root);
-        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(router);
-        host = new SocketHost(port, connectionFactory);
-        serverMap.put("router", router);
-        serverMap.put("host", host);
-        host.start();
-        host.join();
-        // TODO: 1/12/21 command query violation with servermap.  sepearate serverMap from here.
-        return serverMap;
-    }
-
-    public static Map<String, Object> getServerMap() {
-        return serverMap;
-    }
-
-    public static SocketHost getHost() {
-        return host;
-    }
-
-    public static void registerResponders(Router router, String root) {
-        ExceptionInfo.serverName = serverName;
-        Pattern fileRegEx = Pattern.compile("\\..{3,4}$");
-        Pattern listRegEx = Pattern.compile("/listing+(\\/\\w)*");
-        Pattern pingRegEx = Pattern.compile("ping{1}(\\/\\d)*");
-        Pattern formRegEx = Pattern.compile("^\\/form\\?+");
-        Pattern postFormRegEx = Pattern.compile("^\\/form$");
-// COMPLETE TODO: 1/12/21 responders should not need serverName; only responseBuilder
-        router.registerResponder("GET", fileRegEx, new FileResponder(root));
-        router.registerResponder("GET", listRegEx, new ListingResponder(root));
-        router.registerResponder("GET", pingRegEx, new PingResponder());
-        router.registerResponder("GET", formRegEx, new FormResponder());
-        router.registerResponder("POST", postFormRegEx, new MultiPartResponder());
-    }
-
-    private static Map<String, String> makeArgMap(String[] args) {
+    public static Map<String, String> makeArgMap(String[] args) {
         Map<String, String> argMap = new HashMap<>();
         int numOfArgs = args.length;
 
@@ -99,19 +73,25 @@ public class Server {
 
     public static void setConfigMessage(Map<String, String> args) throws IOException {
         String invalidArg;
-
+        resetMsgVars();
         invalidArg = validateArgs(args);
-        port = setPort(args);
-        root = setRoot(args);
+        setPort(args);
+        setRoot(args);
 
         if (invalidArg != null)
             message = "Invalid option: " + invalidArg;
         else {
+            // TODO: 1/13/21 THIS IS WHY I HAD SERVERNAME GOING THROUGHOUT. If only set in connection, then will not print upon start up.  Not giving it to start up, requires setting it in two places...
             String name = serverName + "\r\n";
             String portLine = "Running on port: " + port + ".\r\n";
             String filesLine = "Serving files from: " + root;
             message = name + portLine + filesLine;
         }
+    }
+
+    private static void resetMsgVars() throws IOException {
+        port = 80;
+        root = new File(".").getCanonicalPath() + "/serverFiles";
     }
 
     private static String validateArgs(Map<String, String> args) {
@@ -123,23 +103,51 @@ public class Server {
         return invalidArg;
     }
 
-    private static String setRoot(Map<String, String> args) throws IOException {
+    public static void startServer(int port, String root) throws IOException, InterruptedException {
+        router = new Router();
+        registerResponders(router, root);
+        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(router);
+        host = new SocketHost(port, connectionFactory);
+        host.start();
+        host.join();
+        // COMPLETE TODO: 1/12/21 command query violation with servermap.  sepearate serverMap from here.
+    }
+
+    public static void registerResponders(Router router, String root) {
+        Pattern fileRegEx = Pattern.compile("\\..{3,4}$");
+        Pattern listRegEx = Pattern.compile("/listing+(\\/\\w)*");
+        Pattern pingRegEx = Pattern.compile("ping{1}(\\/\\d)*");
+        Pattern formRegEx = Pattern.compile("^\\/form\\?+");
+        Pattern postFormRegEx = Pattern.compile("^\\/form$");
+// COMPLETE TODO: 1/12/21 responders should not need serverName; only responseBuilder
+        router.registerResponder("GET", fileRegEx, new FileResponder(root));
+        router.registerResponder("GET", listRegEx, new ListingResponder(root));
+        router.registerResponder("GET", pingRegEx, new PingResponder());
+        router.registerResponder("GET", formRegEx, new FormResponder());
+        router.registerResponder("POST", postFormRegEx, new MultiPartResponder());
+    }
+
+    public static SocketHost getHost() {
+        return host;
+    }
+
+    public static Router getRouter() {
+        return router;
+    }
+
+    private static void setRoot(Map<String, String> args) throws IOException {
         if (args.containsKey("-r"))
-            return new File(".").getCanonicalPath() + "/" + args.get("-r");
+            root = new File(".").getCanonicalPath() + "/" + args.get("-r");
         else {
-            String root = new File(".").getCanonicalPath();
             args.put("-r", root);
-            return root;
         }
     }
 
-    private static int setPort(Map<String, String> args) {
+    private static void setPort(Map<String, String> args) {
         if (args.containsKey("-p"))
-            return Integer.parseInt(args.get("-p"));
+            port = Integer.parseInt(args.get("-p"));
         else {
-            int port = 80;
             args.put("-p", String.valueOf(port));
-            return 80;
         }
     }
 

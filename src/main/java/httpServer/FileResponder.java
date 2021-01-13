@@ -23,7 +23,7 @@ public class FileResponder implements Responder {
         put("png", "image/png");
     }};
 
-    public FileResponder( String root) {
+    public FileResponder(String root) {
         this.root = root;
         responseMap = new HashMap<>();
 

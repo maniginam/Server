@@ -47,7 +47,7 @@ public class ServerTest {
     public void submitXEntry() throws IOException, InterruptedException {
         String target = Server.serverName + "\r\n" +
                 "Running on port: 80.\r\n" +
-                "Serving files from: " + new File(".").getCanonicalPath();
+                "Serving files from: " + new File(".").getCanonicalPath() + "/serverFiles";
         args.put("-x", null);
 
         Server.setConfigMessage(args);
@@ -60,7 +60,7 @@ public class ServerTest {
     public void submitPEntryWithX() throws Exception {
         String target = Server.serverName + "\r\n" +
                 "Running on port: 3141.\r\n" +
-                "Serving files from: " + new File(".").getCanonicalPath();
+                "Serving files from: " + new File(".").getCanonicalPath() + "/serverFiles";
         args.put("-x", null);
         args.put("-p", "3141");
 
@@ -90,7 +90,7 @@ public class ServerTest {
     public void messageOnlyFromPEntryWithNOX() throws Exception {
         String target = Server.serverName + "\r\n" +
                 "Running on port: 3141.\r\n" +
-                "Serving files from: " + new File(".").getCanonicalPath();
+                "Serving files from: " + new File(".").getCanonicalPath() + "/serverFiles";
         
         args.put("-p", "3141");
 

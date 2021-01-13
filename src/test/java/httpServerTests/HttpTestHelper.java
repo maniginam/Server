@@ -24,7 +24,7 @@ public class HttpTestHelper {
     private OutputStream output;
     private BufferedReader reader;
     private ByteArrayOutputStream outBytes;
-    String root = new File(".").getCanonicalPath() + "/testroot";
+    String root = new File(".").getCanonicalPath() + "/serverFiles";
     private Path path;
     private byte[] body;
     private int contentLength;
