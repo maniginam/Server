@@ -15,6 +15,7 @@ public class MultiPartResponder implements Responder {
         responseMap = new HashMap<>();
         responseMap.put("statusCode", 200);
         responseMap.put("Content-Type", "application/octet-stream");
+
     }
 
     @Override
@@ -22,6 +23,7 @@ public class MultiPartResponder implements Responder {
         this.request = request;
         responseMap.put("body", makePostMessage());
         responseMap.put("Content-Length", String.valueOf(body.length));
+        responseMap.put("Set-Cookie", String.valueOf(request.get("cookie")));
         return responseMap;
     }
 

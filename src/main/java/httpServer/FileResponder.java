@@ -30,12 +30,18 @@ public class FileResponder implements Responder {
     }
 
     public Map<String, Object> respond(Map<String, Object> request) throws IOException {
+//        System.out.println("FILE RESPONDER request = " + request);
         this.request = request;
+        request.put("clear-cookies", "*");
         String type = determineFileType();
         responseMap.put("body", readFile());
         responseMap.put("statusCode", 200);
         responseMap.put("Content-Type", type);
         responseMap.put("Content-Length", body.length);
+        responseMap.put("Set-Cookie", String.valueOf(request.get("cookie")));
+        if (request.containsKey("clear-cookies"))
+            responseMap.put("Clear-Site-Data: ",  "*");
+
 
         return responseMap;
     }

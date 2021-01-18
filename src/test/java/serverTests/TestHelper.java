@@ -13,7 +13,7 @@ public class TestHelper {
     private BufferedInputStream buffed;
     private OutputStream output;
     private BufferedReader reader;
-    String root = new File(".").getCanonicalPath() + "/testroot";
+    String root = new File(".").getCanonicalPath() + "/serverFiles";
 
     public TestHelper(int port) throws IOException {
         this.port = port;

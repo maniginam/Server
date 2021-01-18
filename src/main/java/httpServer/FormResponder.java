@@ -2,7 +2,6 @@ package httpServer;
 
 import server.Responder;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,10 +17,11 @@ public class FormResponder implements Responder {
     }
 
     @Override
-    public Map<String, Object> respond(Map<String, Object> request) throws IOException {
+    public Map<String, Object> respond(Map<String, Object> request) {
         this.request = request;
         responseMap.put("body", addFormMsgToRspMap());
         responseMap.put("Content-Length", getBodySize());
+        responseMap.put("Set-Cookie", String.valueOf(request.get("cookie")));
         return responseMap;
     }
 

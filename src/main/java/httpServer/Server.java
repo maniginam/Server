@@ -13,6 +13,7 @@ public class Server {
     public static String message;
     private static int port = 80;
     private static String root;
+    private static Map<String, Object> serverMap;
 
     static {
         try {
@@ -27,6 +28,7 @@ public class Server {
     private static SocketHost host;
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        serverMap = new HashMap<>();
         submitArgs(args);
         startServer(port, root);
     }
@@ -105,9 +107,11 @@ public class Server {
 
     public static void startServer(int port, String root) throws IOException, InterruptedException {
         router = new Router();
+        serverMap.put("router", router);
         registerResponders(router, root);
         HttpConnectionFactory connectionFactory = new HttpConnectionFactory(router);
         host = new SocketHost(port, connectionFactory);
+        serverMap.put("host", host);
         host.start();
         host.join();
         // COMPLETE TODO: 1/12/21 command query violation with servermap.  sepearate serverMap from here.

@@ -17,6 +17,7 @@ public class PingResponder implements Responder {
         responseMap = new HashMap<>();
         responseMap.put("statusCode", 200);
         responseMap.put("Content-Type", "text/html");
+
     }
 
     @Override
@@ -24,6 +25,7 @@ public class PingResponder implements Responder {
         this.request = request;
         responseMap.put("body", makeMessage());
         responseMap.put("Content-Length", String.valueOf(body.length));
+        responseMap.put("Set-Cookie", String.valueOf(request.get("cookie")));
         return responseMap;
     }
 

@@ -31,7 +31,7 @@ public class HttpResponseBuilder implements ResponseBuilder {
     }
 
     private void writeStatusLIne() {
-//        System.out.println("HttpRESPONSEBUILDER responseMap = " + responseMap);
+        System.out.println("HttpRESPONSEBUILDER responseMap = " + responseMap);
         int statusCode = (int) responseMap.get("statusCode");
         if (statusCode == 200)
             statusLine = "HTTP/1.1 " + statusCode + " OK\r\n";

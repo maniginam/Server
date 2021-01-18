@@ -25,6 +25,7 @@ public class ListingResponder implements Responder {
         this.request = request;
         responseMap.put("body", getListings());
         responseMap.put("Content-Length", String.valueOf(body.length));
+        responseMap.put("Set-Cookie", String.valueOf(request.get("cookie")));
         return responseMap;
     }
 
