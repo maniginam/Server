@@ -37,9 +37,9 @@ public class FileResponder implements Responder {
         responseMap.put("statusCode", 200);
         responseMap.put("Content-Type", type);
         responseMap.put("Content-Length", body.length);
-        responseMap.put("Set-Cookie", String.valueOf(request.get("cookie")));
-        if (request.containsKey("clear-cookies"))
-            responseMap.put("Clear-Site-Data: ",  "*");
+
+//        if (request.containsKey("clear-cookies"))
+//            responseMap.put("Clear-Site-Data: ",  "*");
 
 
         return responseMap;

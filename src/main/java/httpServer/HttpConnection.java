@@ -16,12 +16,14 @@ public class HttpConnection implements Connection {
     private final Socket socket;
     private final SocketHost host;
     private final Router router;
+    Map<String, Object> routerResponseMap;
     private Thread thread;
     private RequestParser parser;
     private HttpResponseBuilder builder;
     private OutputStream output;
     private byte[] response;
     private HashMap<String, Object> responseMap;
+    private Map<String, Object> request;
 
     public HttpConnection(SocketHost host, Socket socket, Router router) throws IOException {
         this.host = host;
@@ -46,19 +48,27 @@ public class HttpConnection implements Connection {
             while (host.isRunning() && socket.isConnected()) {
                 if (buffedInput.available() > 0) {
                     parser = new RequestParser(buffedInput);
-                    try {
-                        Map<String, Object> request = parser.parse();
-                        System.out.println("request = " + request);
-                        routerResponseMap = router.route(request);
-                    } catch (ExceptionInfo e) {
-                        routerResponseMap = e.getResponse();
-                    }
+                    request = parser.parse();
+
                     responseMap = new HashMap<>();
+                    routerResponseMap = requestToResponse();
+
                     for (String key : routerResponseMap.keySet())
-                        {
+                    {
                         responseMap.put(key, (routerResponseMap.get(key)));
                     }
                     responseMap.put("Server", "Gina's Http Server");
+
+                    if ((int) responseMap.get("statusCode") > 300 && (int) responseMap.get("statusCode") < 400) {
+                        request.remove("resource");
+                        request.put("resource", responseMap.get("Location"));
+
+                        Map<String, Object> responseMap2 = requestToResponse();
+                        responseMap.put("body", responseMap2.get("body"));
+                        responseMap.put("statusCode", responseMap2.get("statusCode"));
+                        responseMap.put("Content-Type", responseMap2.get("Content-Type"));
+                        responseMap.put("Content-Length", responseMap2.get("Content-Length"));
+                    }
 
                     response = builder.buildResponse(responseMap);
                     if (response != null) {
@@ -69,10 +79,20 @@ public class HttpConnection implements Connection {
                     Thread.sleep(1);
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | ExceptionInfo e) {
             e.printStackTrace();
         }
         host.getConnections().remove(this);
+    }
+
+    private Map<String, Object> requestToResponse() throws IOException, InterruptedException {
+
+        try {
+            routerResponseMap = router.route(request);
+        } catch (ExceptionInfo e) {
+            routerResponseMap = e.getResponse();
+        }
+        return routerResponseMap;
     }
 
     private void send(byte[] response) throws IOException {

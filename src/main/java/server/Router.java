@@ -43,8 +43,8 @@ public class Router {
                 responseMap = responder.respond(request);
             else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
         } else throw new ExceptionInfo("The page you are looking for is 93 million miles away!");
-        if (responseMap.containsKey("re-route"))
-            responseMap = this.route(responseMap);
+//        if (responseMap.containsKey("re-route"))
+//            responseMap = this.route(responseMap);
         return responseMap;
     }
 

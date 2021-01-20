@@ -21,7 +21,7 @@ public class FormResponder implements Responder {
         this.request = request;
         responseMap.put("body", addFormMsgToRspMap());
         responseMap.put("Content-Length", getBodySize());
-        responseMap.put("Set-Cookie", String.valueOf(request.get("cookie")));
+
         return responseMap;
     }
 

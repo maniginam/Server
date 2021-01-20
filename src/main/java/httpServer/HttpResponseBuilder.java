@@ -26,17 +26,20 @@ public class HttpResponseBuilder implements ResponseBuilder {
         writeHeaders();
         writeBody();
         response.write(responseMsg.getBytes());
-        response.write(body);
+        if (body != null)
+            response.write(body);
         return response.toByteArray();
     }
 
     private void writeStatusLIne() {
-        System.out.println("HttpRESPONSEBUILDER responseMap = " + responseMap);
+//        System.out.println("HttpRESPONSEBUILDER responseMap = " + responseMap);
         int statusCode = (int) responseMap.get("statusCode");
         if (statusCode == 200)
             statusLine = "HTTP/1.1 " + statusCode + " OK\r\n";
         else if (statusCode == 404)
             statusLine = "HTTP/1.1 " + statusCode + " page not found\r\n";
+        else if(statusCode == 301)
+            statusLine = "HTTP/1.1" + statusCode + "redirect!";
         responseMsg = statusLine;
     }
 
